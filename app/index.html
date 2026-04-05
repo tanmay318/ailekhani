@@ -1,0 +1,2687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AI Lekhani — AI Book Writer</title>
+<meta name="description" content="AI Lekhani — AI-powered novel writing for Indian writers. Write in English, Hindi, or Tamil. Free to start at ailekhani.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Devanagari:wght@400;500&family=Noto+Sans+Tamil:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0e0c09;--bg2:#141210;--bg3:#1a1814;--bg4:#211e1a;
+  --surface:#252118;--surface2:#2c2820;
+  --gold:#c8922a;--gold2:#e8b84a;--gold3:#f5d070;--gold-dim:#7a5818;
+  --text1:#f0e8d8;--text2:#c8b898;--text3:#907868;--text4:#604838;
+  --border:#3a3020;--border2:#4a4030;
+  --green:#4a8a4a;--red:#8a3a3a;--blue:#3a6a9a;
+  --shadow:0 4px 24px rgba(0,0,0,0.4);--shadow-lg:0 8px 48px rgba(0,0,0,0.6);
+  --radius:8px;--radius-lg:12px;--radius-xl:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Cormorant Garamond',Georgia,serif;background:var(--bg);color:var(--text1);height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:var(--bg2);}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+a{color:var(--gold);text-decoration:none;}a:hover{color:var(--gold2);}
+code{font-family:'JetBrains Mono',monospace;font-size:0.85em;background:var(--bg3);padding:1px 5px;border-radius:3px;color:var(--gold);}
+
+/* ── SCREEN ── */
+.screen{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:var(--bg);overflow-y:auto;padding:20px;}
+.screen.hidden{display:none;}
+
+/* ═══════════════ ONBOARDING ═══════════════ */
+.ob-wrap{width:100%;max-width:600px;margin:0 auto;display:flex;flex-direction:column;align-items:center;}
+.ob-step{display:none;flex-direction:column;align-items:center;text-align:center;width:100%;}
+.ob-step.active{display:flex;}
+.ob-logo{font-family:'Cormorant Garamond',serif;font-size:52px;font-weight:300;color:var(--gold2);letter-spacing:0.08em;margin-bottom:2px;font-style:italic;}
+.ob-tagline{font-size:11px;color:var(--text4);letter-spacing:0.2em;text-transform:uppercase;font-family:'JetBrains Mono',monospace;margin-bottom:24px;}
+.ob-dots{display:flex;gap:8px;justify-content:center;margin-bottom:20px;}
+.ob-dot{width:6px;height:6px;border-radius:50%;background:var(--border2);transition:all 0.3s;}
+.ob-dot.active{background:var(--gold);width:18px;border-radius:3px;}
+.ob-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:28px 32px;width:100%;text-align:left;box-shadow:var(--shadow-lg);}
+.ob-card h2{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500;color:var(--text2);margin-bottom:6px;font-style:italic;}
+.ob-card p{color:var(--text3);font-size:15px;line-height:1.7;margin-bottom:16px;}
+.ob-btn{width:100%;background:var(--gold-dim);border:1px solid var(--gold-dim);border-radius:var(--radius);color:var(--gold3);padding:13px;cursor:pointer;font-family:'Cormorant Garamond',serif;font-size:17px;font-style:italic;transition:all 0.2s;margin-top:8px;letter-spacing:0.04em;}
+.ob-btn:hover{background:var(--gold);border-color:var(--gold);color:var(--bg);}
+.ob-btn:disabled{background:var(--bg3);border-color:var(--border);color:var(--text4);cursor:not-allowed;}
+.ob-skip{background:none;border:none;color:var(--text4);font-size:13px;cursor:pointer;margin-top:10px;text-decoration:underline;font-family:'Cormorant Garamond',serif;}
+.ob-skip:hover{color:var(--text3);}
+.ob-field{margin-bottom:14px;}
+.ob-field label{display:block;font-size:10px;color:var(--text4);text-transform:uppercase;letter-spacing:0.14em;margin-bottom:5px;font-family:'JetBrains Mono',monospace;}
+.ob-field input,.ob-field select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:10px 13px;font-family:'Cormorant Garamond',Georgia,serif;font-size:15px;color:var(--text1);}
+.ob-field input:focus,.ob-field select:focus{outline:none;border-color:var(--gold-dim);}
+.ob-field input::placeholder{color:var(--text4);}
+.key-wrap{position:relative;}.key-wrap input{padding-right:72px;}
+.key-toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text4);cursor:pointer;font-size:10px;font-family:'JetBrains Mono',monospace;}
+.key-st{font-size:12px;margin-top:5px;height:16px;font-family:'JetBrains Mono',monospace;}
+.key-st.valid{color:var(--green);}.key-st.invalid{color:var(--red);}
+.ob-hint{font-size:12px;color:var(--text4);margin-top:6px;line-height:1.6;font-style:italic;}
+.feat-list{display:flex;flex-direction:column;gap:9px;margin-bottom:16px;}
+.feat-row{display:flex;align-items:flex-start;gap:10px;font-size:15px;}
+.feat-icon{font-size:14px;flex-shrink:0;width:20px;text-align:center;margin-top:1px;}
+.feat-desc{color:var(--text2);line-height:1.5;}
+.feat-desc strong{color:var(--text1);}
+.free-banner{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;display:flex;gap:12px;}
+.fb-badge{background:var(--gold-dim);color:var(--gold3);font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 7px;border-radius:4px;white-space:nowrap;flex-shrink:0;margin-top:2px;letter-spacing:0.08em;}
+.fb-title{font-family:'Cormorant Garamond',serif;font-size:15px;color:var(--gold2);margin-bottom:3px;font-style:italic;}
+.fb-desc{font-size:13px;color:var(--text3);line-height:1.5;}
+
+/* Provider cards */
+.provider-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px;}
+.pcard{border:1px solid var(--border);border-radius:var(--radius);padding:12px 10px;cursor:pointer;transition:all 0.15s;background:var(--bg3);text-align:center;position:relative;}
+.pcard:hover{border-color:var(--gold-dim);}
+.pcard.selected{border-color:var(--gold);background:var(--surface);}
+.pcard .pc-check{position:absolute;top:6px;right:6px;width:14px;height:14px;border-radius:50%;background:var(--gold);color:var(--bg);font-size:8px;display:none;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;}
+.pcard.selected .pc-check{display:flex;}
+.pcard .pc-logo{font-size:20px;margin-bottom:5px;}
+.pcard .pc-name{font-family:'Cormorant Garamond',serif;font-size:14px;color:var(--text2);margin-bottom:2px;}
+.pcard .pc-cost{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text4);}
+
+/* Lang cards */
+.lang-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px;}
+.lcard{border:1px solid var(--border);border-radius:var(--radius);padding:14px 10px;cursor:pointer;transition:all 0.15s;background:var(--bg3);text-align:center;position:relative;}
+.lcard:hover{border-color:var(--gold-dim);}
+.lcard.selected{border-color:var(--gold);background:var(--surface);}
+.lcard .lc-check{position:absolute;top:6px;right:6px;width:14px;height:14px;border-radius:50%;background:var(--gold);color:var(--bg);font-size:8px;display:none;align-items:center;justify-content:center;}
+.lcard.selected .lc-check{display:flex;}
+.lcard .lc-flag{font-size:22px;margin-bottom:5px;}
+.lcard .lc-name{font-family:'Cormorant Garamond',serif;font-size:14px;color:var(--text2);margin-bottom:2px;}
+.lcard .lc-sub{font-size:11px;color:var(--text4);font-family:'JetBrains Mono',monospace;}
+.pv-detail-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:10px 13px;margin-bottom:13px;font-size:13px;color:var(--text3);}
+
+/* ═══════════════ TOP BAR ═══════════════ */
+#topbar{height:48px;background:var(--bg2);display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0;border-bottom:1px solid var(--border);}
+.logo-mark{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:300;color:var(--gold2);letter-spacing:0.08em;font-style:italic;flex-shrink:0;}
+.tb-div{width:1px;height:22px;background:var(--border);flex-shrink:0;}
+#project-name-display{font-family:'Cormorant Garamond',serif;font-size:13px;color:var(--text3);font-style:italic;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tb-spacer{flex:1;}
+.tb-btn{background:none;border:1px solid var(--border);color:var(--text3);padding:4px 10px;border-radius:var(--radius);cursor:pointer;font-size:12px;font-family:'Cormorant Garamond',Georgia,serif;transition:all 0.15s;white-space:nowrap;}
+.tb-btn:hover{border-color:var(--gold-dim);color:var(--gold2);}
+.tb-btn.primary{background:var(--gold-dim);border-color:var(--gold-dim);color:var(--gold3);}
+.tb-btn.primary:hover{background:var(--gold);color:var(--bg);}
+.free-pill{background:var(--bg3);border:1px solid var(--gold-dim);color:var(--gold);font-family:'JetBrains Mono',monospace;font-size:9px;padding:3px 8px;border-radius:10px;cursor:pointer;letter-spacing:0.06em;}
+.free-pill:hover{border-color:var(--gold);}
+
+/* Language/Model switcher in topbar */
+.tb-selector{display:flex;align-items:center;gap:5px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:3px 8px;cursor:pointer;transition:all 0.15s;font-size:12px;color:var(--text3);font-family:'JetBrains Mono',monospace;}
+.tb-selector:hover{border-color:var(--gold-dim);color:var(--gold2);}
+.tb-selector .ts-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+
+/* ═══════════════ MAIN LAYOUT ═══════════════ */
+#app{display:flex;flex:1;overflow:hidden;}
+
+/* SIDEBAR */
+#sidebar{width:240px;background:var(--bg2);display:flex;flex-direction:column;flex-shrink:0;border-right:1px solid var(--border);overflow:hidden;}
+.sb-section{padding:9px 12px 7px;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--text4);border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;display:flex;align-items:center;justify-content:space-between;}
+.sb-add{background:none;border:none;color:var(--text4);cursor:pointer;font-size:18px;line-height:1;padding:0 2px;transition:color 0.15s;}
+.sb-add:hover{color:var(--gold2);}
+.sb-list{overflow-y:auto;flex:1;}
+.sb-item{display:flex;align-items:center;padding:8px 11px;cursor:pointer;border-left:2px solid transparent;transition:all 0.15s;gap:7px;}
+.sb-item:hover{background:var(--bg3);}
+.sb-item.active{background:var(--surface);border-left-color:var(--gold);}
+.sb-num{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text4);width:16px;flex-shrink:0;}
+.sb-label{font-family:'Cormorant Garamond',serif;font-size:13px;color:var(--text3);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sb-item.active .sb-label{color:var(--gold2);}
+.sb-count{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--border2);}
+.sb-del{opacity:0;background:none;border:none;color:var(--text4);cursor:pointer;font-size:12px;padding:0 2px;transition:all 0.15s;}
+.sb-item:hover .sb-del{opacity:1;}
+.sb-del:hover{color:var(--red);}
+.sb-bottom{padding:9px 11px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:5px;}
+.sb-status{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text4);font-family:'JetBrains Mono',monospace;padding:5px 7px;border-radius:5px;background:var(--bg);cursor:pointer;transition:all 0.15s;}
+.sb-status:hover{background:var(--bg3);}
+.sb-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+
+/* CENTER */
+#center{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+/* CODEX PANEL */
+#codex-panel{width:280px;background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;transition:width 0.2s,border 0.2s;}
+#codex-panel.collapsed{width:0;border-left:none;}
+.cx-header{padding:11px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;background:var(--bg2);flex-shrink:0;}
+.cx-header h3{font-family:'Cormorant Garamond',serif;font-size:14px;font-style:italic;color:var(--text2);flex:1;}
+.cx-tabs{display:flex;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0;}
+.cx-tab{flex:1;padding:8px 2px;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-size:10px;color:var(--text4);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.06em;transition:all 0.15s;}
+.cx-tab.active{border-bottom-color:var(--gold);color:var(--gold);}
+.cx-content{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;}
+.cx-label{font-size:10px;color:var(--text4);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:6px;font-family:'JetBrains Mono',monospace;}
+.cx-ta{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:10px;font-family:'Cormorant Garamond',Georgia,serif;font-size:14px;color:var(--text1);line-height:1.7;resize:none;flex:1;min-height:160px;}
+.cx-ta:focus{outline:none;border-color:var(--gold-dim);}
+.cx-save{margin-top:8px;width:100%;background:var(--gold-dim);border:1px solid var(--gold-dim);border-radius:var(--radius);color:var(--gold3);padding:8px;cursor:pointer;font-family:'Cormorant Garamond',serif;font-size:14px;font-style:italic;transition:all 0.15s;}
+.cx-save:hover{background:var(--gold);color:var(--bg);}
+.cx-saved{text-align:center;font-size:11px;color:var(--green);margin-top:4px;height:15px;font-family:'JetBrains Mono',monospace;}
+
+/* CHAT */
+#chat-header{padding:10px 16px;border-bottom:1px solid var(--border);background:var(--bg2);display:flex;align-items:center;gap:12px;flex-shrink:0;}
+#chapter-title-input{font-family:'Cormorant Garamond',serif;font-size:15px;font-style:italic;color:var(--text2);flex:1;background:none;border:none;cursor:text;}
+#chapter-title-input:focus{outline:none;color:var(--text1);}
+.ch-meta{font-size:10px;color:var(--text4);font-family:'JetBrains Mono',monospace;white-space:nowrap;}
+#messages{flex:1;overflow-y:auto;padding:18px 22px;display:flex;flex-direction:column;gap:16px;background:var(--bg);}
+.msg-wrap{display:flex;flex-direction:column;}
+.msg-wrap.user{align-items:flex-end;}.msg-wrap.assistant{align-items:flex-start;}
+.msg-sender{font-size:9px;color:var(--text4);font-family:'JetBrains Mono',monospace;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;}
+.msg-bubble{max-width:84%;padding:12px 15px;border-radius:var(--radius);line-height:1.85;font-size:15px;white-space:pre-wrap;}
+.msg-bubble.user{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius) var(--radius) 2px var(--radius);color:var(--text2);}
+.msg-bubble.assistant{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius) var(--radius) var(--radius) 2px;color:var(--text1);box-shadow:var(--shadow);}
+.msg-bubble.assistant.long{max-width:94%;font-size:15.5px;line-height:1.9;}
+.msg-actions{display:flex;gap:6px;margin-top:4px;}
+.msg-act{background:none;border:1px solid var(--border);color:var(--text4);padding:2px 8px;border-radius:4px;cursor:pointer;font-size:10px;font-family:'JetBrains Mono',monospace;transition:all 0.15s;}
+.msg-act:hover{border-color:var(--gold-dim);color:var(--gold);}
+.typing{display:flex;align-items:center;gap:8px;color:var(--text4);font-style:italic;font-size:13px;}
+.dot{width:4px;height:4px;border-radius:50%;background:var(--text4);animation:blink 1.2s infinite;}
+.dot:nth-child(2){animation-delay:0.2s;}.dot:nth-child(3){animation-delay:0.4s;}
+@keyframes blink{0%,100%{opacity:0.2;transform:scale(0.8)}50%{opacity:1;transform:scale(1.2)}}
+.empty-chat{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--text4);font-style:italic;}
+.empty-ornament{font-size:32px;color:var(--border2);font-family:'Cormorant Garamond',serif;}
+
+/* INPUT */
+#input-area{padding:11px 15px;border-top:1px solid var(--border);background:var(--bg2);flex-shrink:0;}
+.quick-btns{display:flex;gap:5px;margin-bottom:8px;flex-wrap:wrap;}
+.qb{background:var(--bg3);border:1px solid var(--border);color:var(--text4);padding:3px 9px;border-radius:12px;cursor:pointer;font-size:12px;font-family:'Cormorant Garamond',serif;transition:all 0.15s;white-space:nowrap;}
+.qb:hover{background:var(--surface);color:var(--text2);border-color:var(--border2);}
+
+/* Input language + model row */
+.input-controls{display:flex;gap:8px;align-items:center;margin-bottom:7px;flex-wrap:wrap;}
+.ic-label{font-size:10px;color:var(--text4);font-family:'JetBrains Mono',monospace;letter-spacing:0.08em;}
+.ic-select{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:4px 8px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);cursor:pointer;transition:all 0.15s;}
+.ic-select:focus{outline:none;border-color:var(--gold-dim);}
+.ic-select:hover{border-color:var(--border2);}
+.ic-divider{width:1px;height:16px;background:var(--border);}
+
+.input-row{display:flex;gap:7px;align-items:flex-end;}
+#user-input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:9px 12px;font-family:'Cormorant Garamond',Georgia,serif;font-size:15px;color:var(--text1);line-height:1.6;resize:none;min-height:42px;max-height:120px;}
+#user-input:focus{outline:none;border-color:var(--gold-dim);}
+#send-btn{background:var(--gold-dim);border:1px solid var(--gold-dim);border-radius:var(--radius);color:var(--gold3);width:42px;height:42px;cursor:pointer;font-size:16px;transition:all 0.15s;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+#send-btn:hover:not(:disabled){background:var(--gold);color:var(--bg);transform:scale(1.04);}
+#send-btn:disabled{background:var(--bg3);border-color:var(--border);cursor:not-allowed;color:var(--text4);}
+.input-hint{font-size:10px;color:var(--text4);margin-top:4px;font-family:'JetBrains Mono',monospace;}
+
+/* NO PROJECT */
+#no-project-screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;background:var(--bg);}
+.np-hero{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;font-style:italic;color:var(--text2);margin-bottom:8px;text-align:center;}
+.np-sub{color:var(--text4);font-size:15px;max-width:380px;line-height:1.7;margin-bottom:22px;text-align:center;}
+.np-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:24px 28px;width:100%;max-width:420px;box-shadow:var(--shadow);}
+.np-field{margin-bottom:13px;}
+.np-field label{display:block;font-size:10px;color:var(--text4);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:5px;font-family:'JetBrains Mono',monospace;}
+.np-field input,.np-field textarea,.np-field select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:9px 12px;font-family:'Cormorant Garamond',Georgia,serif;font-size:14px;color:var(--text1);}
+.np-field input:focus,.np-field textarea:focus,.np-field select:focus{outline:none;border-color:var(--gold-dim);}
+.np-field textarea{min-height:64px;resize:vertical;line-height:1.6;}
+.np-btn{width:100%;background:var(--gold-dim);border:1px solid var(--gold-dim);border-radius:var(--radius);color:var(--gold3);padding:12px;cursor:pointer;font-family:'Cormorant Garamond',serif;font-size:16px;font-style:italic;transition:all 0.2s;margin-top:4px;}
+.np-btn:hover{background:var(--gold);color:var(--bg);}
+
+/* MODAL */
+#modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px;}
+#modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:22px 26px;width:90%;max-width:520px;box-shadow:var(--shadow-lg);max-height:88vh;overflow-y:auto;}
+.modal h2{font-family:'Cormorant Garamond',serif;font-size:20px;font-style:italic;color:var(--text2);margin-bottom:14px;}
+.modal-row{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;}
+.modal-cancel{background:none;border:1px solid var(--border);color:var(--text3);padding:6px 13px;border-radius:var(--radius);cursor:pointer;font-family:'Cormorant Garamond',serif;font-size:14px;}
+.modal-ok{background:var(--gold-dim);border:1px solid var(--gold-dim);color:var(--gold3);padding:6px 13px;border-radius:var(--radius);cursor:pointer;font-family:'Cormorant Garamond',serif;font-size:14px;}
+.proj-row{display:flex;align-items:center;padding:8px 0;gap:9px;border-bottom:0.5px solid var(--border);}
+.proj-info{flex:1;}
+.proj-name-m{font-family:'Cormorant Garamond',serif;font-size:14px;font-style:italic;color:var(--text2);}
+.proj-date-m{font-size:10px;color:var(--text4);font-family:'JetBrains Mono',monospace;}
+.proj-open-btn{background:none;border:1px solid var(--border);color:var(--text3);padding:3px 9px;border-radius:4px;cursor:pointer;font-size:11px;transition:all 0.15s;}
+.proj-open-btn:hover{border-color:var(--gold-dim);color:var(--gold);}
+.proj-del-btn{background:none;border:none;color:var(--text4);cursor:pointer;font-size:13px;transition:color 0.15s;}
+.proj-del-btn:hover{color:var(--red);}
+.settings-section{margin-bottom:16px;}
+.settings-section h3{font-family:'Cormorant Garamond',serif;font-size:15px;font-style:italic;color:var(--text2);margin-bottom:10px;padding-bottom:5px;border-bottom:0.5px solid var(--border);}
+.provider-setting{border:1px solid var(--border);border-radius:var(--radius);padding:10px 13px;margin-bottom:8px;background:var(--bg3);}
+.provider-setting.active-provider{border-color:var(--gold-dim);background:var(--surface);}
+.ps-header{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.ps-logo{font-size:16px;}
+.ps-name{font-family:'Cormorant Garamond',serif;font-size:14px;font-style:italic;color:var(--text2);flex:1;}
+.ps-active-badge{font-size:9px;font-family:'JetBrains Mono',monospace;background:var(--gold-dim);color:var(--gold3);padding:2px 6px;border-radius:4px;letter-spacing:0.06em;}
+.ps-use-btn{font-size:10px;font-family:'JetBrains Mono',monospace;background:none;border:1px solid var(--border);color:var(--text4);padding:2px 7px;border-radius:4px;cursor:pointer;transition:all 0.15s;}
+.ps-use-btn:hover{border-color:var(--gold-dim);color:var(--gold);}
+.ps-field{display:flex;gap:7px;align-items:center;}
+.ps-field input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:6px 9px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text1);}
+.ps-field input:focus{outline:none;border-color:var(--gold-dim);}
+.ps-toggle{background:none;border:none;color:var(--text4);cursor:pointer;font-size:10px;font-family:'JetBrains Mono',monospace;}
+.ps-status{font-size:10px;margin-top:4px;height:14px;font-family:'JetBrains Mono',monospace;}
+.settings-row{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:0.5px solid var(--border);}
+.settings-row:last-child{border-bottom:none;}
+.sl{flex:1;}.sl strong{font-size:14px;color:var(--text1);display:block;margin-bottom:1px;font-family:'Cormorant Garamond',serif;font-style:italic;}.sl span{font-size:11px;color:var(--text4);font-family:'JetBrains Mono',monospace;}
+
+/* Device security section */
+.device-list{display:flex;flex-direction:column;gap:6px;margin-top:8px;}
+.device-row{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg3);border-radius:var(--radius);border:1px solid var(--border);font-size:12px;}
+.device-icon{font-size:14px;flex-shrink:0;}
+.device-info{flex:1;}
+.device-name{color:var(--text2);font-family:'JetBrains Mono',monospace;font-size:11px;}
+.device-date{color:var(--text4);font-size:10px;font-family:'JetBrains Mono',monospace;}
+.device-current{font-size:9px;background:var(--green);color:#fff;padding:1px 5px;border-radius:3px;font-family:'JetBrains Mono',monospace;}
+.device-revoke{background:none;border:1px solid var(--border);color:var(--red);padding:2px 7px;border-radius:4px;cursor:pointer;font-size:10px;font-family:'JetBrains Mono',monospace;transition:all 0.15s;}
+.device-revoke:hover{background:var(--red);color:#fff;}
+.security-warning{background:var(--bg);border:1px solid var(--red);border-radius:var(--radius);padding:10px 13px;font-size:12px;color:var(--red);font-family:'JetBrains Mono',monospace;margin-top:8px;line-height:1.6;}
+
+/* Model selector panel */
+.model-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+.model-card{border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;cursor:pointer;transition:all 0.15s;background:var(--bg3);}
+.model-card:hover{border-color:var(--gold-dim);}
+.model-card.selected{border-color:var(--gold);background:var(--surface);}
+.model-card .mc-name{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);margin-bottom:3px;}
+.model-card .mc-desc{font-size:12px;color:var(--text4);line-height:1.4;}
+.model-card .mc-cost{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--gold);margin-top:4px;}
+
+/* Upgrade */
+.upgrade-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:14px;}
+.upgrade-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-style:italic;color:var(--gold2);margin-bottom:6px;}
+.upgrade-price{font-size:32px;font-weight:300;color:var(--gold2);font-family:'Cormorant Garamond',serif;}
+.upgrade-price span{font-size:15px;color:var(--text4);}
+.upgrade-features{display:flex;flex-direction:column;gap:5px;margin-top:10px;}
+.upgrade-feature{font-size:13px;color:var(--text3);display:flex;gap:8px;font-family:'Cormorant Garamond',serif;}
+.upgrade-feature::before{content:'→';color:var(--gold-dim);}
+.upgrade-btn{width:100%;background:var(--gold-dim);border:1px solid var(--gold-dim);border-radius:var(--radius);color:var(--gold3);padding:12px;cursor:pointer;font-family:'Cormorant Garamond',serif;font-size:17px;font-style:italic;transition:all 0.2s;margin-top:12px;}
+.upgrade-btn:hover{background:var(--gold);color:var(--bg);}
+
+/* Export/Import */
+.ei-btn{width:100%;background:none;border:1px solid var(--border);color:var(--text2);padding:9px;border-radius:var(--radius);cursor:pointer;font-family:'Cormorant Garamond',serif;font-size:14px;font-style:italic;transition:all 0.15s;text-align:center;margin-bottom:8px;}
+.ei-btn:hover{border-color:var(--gold-dim);color:var(--gold);}
+.ei-btn.primary{background:var(--gold-dim);border-color:var(--gold-dim);color:var(--gold3);}
+.ei-btn.primary:hover{background:var(--gold);color:var(--bg);}
+
+/* TOAST */
+#toast{position:fixed;bottom:18px;right:18px;background:var(--surface);border:1px solid var(--border);color:var(--gold2);padding:8px 14px;border-radius:var(--radius);font-family:'JetBrains Mono',monospace;font-size:12px;z-index:3000;opacity:0;transform:translateY(6px);transition:all 0.2s;pointer-events:none;}
+#toast.show{opacity:1;transform:translateY(0);}
+#toast.error{border-color:var(--red);color:var(--red);}
+
+/* ═══ GEMINI-FIRST ONBOARDING ═══ */
+.ob-wrap{width:100%;max-width:560px;margin:0 auto;display:flex;flex-direction:column;align-items:center;}
+.ob-step{display:none;flex-direction:column;align-items:center;text-align:center;width:100%;}
+.ob-step.active{display:flex;}
+.ob-logo{font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:300;color:var(--gold2);
+  letter-spacing:0.08em;margin-bottom:2px;font-style:italic;}
+.ob-tagline{font-size:10px;color:var(--text4);letter-spacing:0.2em;text-transform:uppercase;
+  font-family:'JetBrains Mono',monospace;margin-bottom:22px;}
+.ob-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);
+  padding:26px 28px;width:100%;text-align:left;box-shadow:var(--shadow-lg);}
+.ob-card h2{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:500;
+  color:var(--text2);margin-bottom:6px;font-style:italic;}
+.ob-card p{color:var(--text3);font-size:14px;line-height:1.7;margin-bottom:16px;}
+.ob-btn{width:100%;background:var(--gold-dim);border:1px solid var(--gold-dim);border-radius:var(--radius);
+  color:var(--gold3);padding:13px;cursor:pointer;font-family:'Cormorant Garamond',serif;
+  font-size:17px;font-style:italic;transition:all 0.2s;margin-top:8px;letter-spacing:0.04em;}
+.ob-btn:hover{background:var(--gold);border-color:var(--gold);color:var(--bg);}
+.ob-btn:disabled{background:var(--bg3);border-color:var(--border);color:var(--text4);cursor:not-allowed;}
+.ob-skip{background:none;border:none;color:var(--text4);font-size:12px;cursor:pointer;
+  margin-top:12px;font-family:'JetBrains Mono',monospace;display:block;width:100%;text-align:center;}
+.ob-skip:hover{color:var(--text2);}
+
+/* Gemini hero block */
+.gemini-hero{background:linear-gradient(135deg,#0e2018 0%,#0a1a10 100%);
+  border:1px solid #1a4a28;border-radius:var(--radius-lg);padding:20px;margin-bottom:18px;}
+.gh-top{margin-bottom:16px;}
+.gh-badge{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.12em;
+  color:#4a8a5a;text-transform:uppercase;margin-bottom:8px;}
+.gh-title{font-family:'Cormorant Garamond',serif;font-size:19px;font-style:italic;
+  color:#c8f0d0;margin-bottom:6px;}
+.gh-sub{font-size:13px;color:#5a8a68;line-height:1.6;}
+.gh-steps{display:flex;flex-direction:column;gap:10px;margin-bottom:16px;}
+.gh-step{display:flex;align-items:flex-start;gap:12px;}
+.gh-num{width:22px;height:22px;border-radius:50%;background:#1a4a28;border:1px solid #2a6a3a;
+  color:#6aaa7a;font-family:'JetBrains Mono',monospace;font-size:11px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.gh-text{display:flex;flex-direction:column;gap:2px;}
+.gh-link{color:#4abf6a;font-size:14px;font-weight:500;text-decoration:none;}
+.gh-link:hover{color:#6adf8a;}
+.gh-action{font-size:14px;color:#a8d8b0;}
+.gh-hint{font-size:11px;color:#3a6a48;font-family:'JetBrains Mono',monospace;}
+.gh-input-row{display:flex;gap:8px;margin-top:4px;}
+.gh-input-row input{flex:1;background:#0a1a10;border:1px solid #2a5a38;border-radius:var(--radius);
+  padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#c8f0d0;
+  outline:none;transition:border-color 0.2s;}
+.gh-input-row input:focus{border-color:#4a8a5a;}
+.gh-input-row input::placeholder{color:#2a4a32;}
+.gh-input-row button{background:#1a6a30;border:1px solid #2a8a40;color:#a8f0b0;
+  padding:10px 16px;border-radius:var(--radius);cursor:pointer;white-space:nowrap;
+  font-family:'Cormorant Garamond',serif;font-size:15px;font-style:italic;transition:all 0.2s;}
+.gh-input-row button:hover:not(:disabled){background:#2a8a40;color:#e0ffe8;}
+.gh-input-row button:disabled{background:#0d2018;border-color:#1a3020;color:#2a4a32;cursor:not-allowed;}
+.gh-status{font-family:'JetBrains Mono',monospace;font-size:11px;margin-top:7px;min-height:15px;}
+.gh-status.valid{color:#4a8a5a;}.gh-status.invalid{color:#8a4a4a;}
+
+/* Divider */
+.ob-divider{display:flex;align-items:center;gap:12px;margin:6px 0 14px;color:var(--text4);
+  font-size:11px;font-family:'JetBrains Mono',monospace;}
+.ob-divider::before,.ob-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* Paid options */
+.paid-options{display:flex;flex-direction:column;gap:8px;margin-bottom:4px;}
+.paid-card{display:flex;align-items:center;gap:12px;padding:12px 14px;
+  background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);
+  cursor:pointer;transition:all 0.15s;}
+.paid-card:hover{border-color:var(--gold-dim);background:var(--surface);}
+.paid-logo{font-size:18px;flex-shrink:0;}
+.paid-info{flex:1;}
+.paid-name{font-family:'Cormorant Garamond',serif;font-size:14px;font-style:italic;color:var(--text2);}
+.paid-cost{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text4);margin-top:1px;}
+.paid-arrow{color:var(--text4);font-size:14px;transition:color 0.15s;}
+.paid-card:hover .paid-arrow{color:var(--gold);}
+
+/* Paid key setup */
+.paid-key-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);
+  padding:14px;margin-bottom:14px;}
+.pkb-hint{font-size:13px;color:var(--text3);line-height:1.6;}
+.pkb-hint a{color:var(--gold);}
+.key-wrap{position:relative;}.key-wrap input{width:100%;background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--radius);padding:10px 72px 10px 13px;font-family:'JetBrains Mono',monospace;
+  font-size:12px;color:var(--text1);}
+.key-wrap input:focus{outline:none;border-color:var(--gold-dim);}
+.key-wrap input::placeholder{color:var(--text4);}
+.key-toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;
+  border:none;color:var(--text4);cursor:pointer;font-size:10px;font-family:'JetBrains Mono',monospace;}
+.key-st{font-size:11px;margin-top:6px;min-height:16px;font-family:'JetBrains Mono',monospace;}
+.key-st.valid{color:var(--green);}.key-st.invalid{color:var(--red);}
+
+/* Language cards */
+.lang-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px;}
+.lcard{border:1px solid var(--border);border-radius:var(--radius);padding:14px 10px;cursor:pointer;
+  transition:all 0.15s;background:var(--bg3);text-align:center;position:relative;}
+.lcard:hover{border-color:var(--gold-dim);}
+.lcard.selected{border-color:var(--gold);background:var(--surface);}
+.lc-check{position:absolute;top:6px;right:6px;width:14px;height:14px;border-radius:50%;
+  background:var(--gold);color:var(--bg);font-size:8px;display:none;align-items:center;
+  justify-content:center;font-family:'JetBrains Mono',monospace;}
+.lcard.selected .lc-check{display:flex;}
+.lc-flag{font-size:22px;margin-bottom:5px;}
+.lc-name{font-family:'Cormorant Garamond',serif;font-size:14px;color:var(--text2);margin-bottom:2px;}
+.lc-sub{font-size:10px;color:var(--text4);font-family:'JetBrains Mono',monospace;}
+
+
+/* ═══════════════════════════════════════════
+   MOBILE RESPONSIVE — 768px and below
+   Strategy:
+   - Sidebar becomes slide-in drawer (off-screen left)
+   - Codex panel becomes bottom sheet
+   - Topbar collapses to logo + hamburger
+   - Input area stays full width
+   - Touch targets min 44px
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+
+  /* ── Body: allow scrolling on mobile ── */
+  body { overflow: auto; }
+
+  /* ── Topbar: slim down ── */
+  #topbar {
+    height: 52px;
+    padding: 0 12px;
+    gap: 6px;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+  }
+  /* Hide non-essential topbar items on mobile */
+  .tb-div,
+  #project-name-display,
+  .free-pill,
+  #export-btn,
+  #lang-selector,
+  #model-selector { display: none !important; }
+
+  /* Show hamburger + books button only */
+  #tb-hamburger { display: flex !important; }
+  .tb-spacer { flex: 1; }
+
+  /* ── App layout: stack vertically ── */
+  #app {
+    flex-direction: column;
+    height: calc(100vh - 52px);
+    overflow: hidden;
+  }
+
+  /* ── Sidebar: hidden by default, slides in as drawer ── */
+  #sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    z-index: 400;
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-lg);
+  }
+  #sidebar.open { transform: translateX(0); }
+
+  /* Overlay when sidebar is open */
+  #sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 390;
+  }
+  #sidebar-overlay.show { display: block; }
+
+  /* ── Codex panel: hidden by default, slides up as bottom sheet ── */
+  #codex-panel {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100% !important;
+    height: 70vh;
+    border-left: none !important;
+    border-top: 1px solid var(--border);
+    border-radius: 16px 16px 0 0;
+    z-index: 400;
+    transform: translateY(100%);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  #codex-panel.open { transform: translateY(0); }
+  #codex-panel.collapsed { width: 100% !important; transform: translateY(100%); }
+
+  /* Codex drag handle */
+  #codex-panel::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 4px;
+    background: var(--border2);
+    border-radius: 2px;
+    margin: 10px auto 6px;
+    flex-shrink: 0;
+  }
+
+  /* ── Center: full width ── */
+  #center { width: 100%; flex: 1; }
+
+  /* ── Chat header: simplified ── */
+  #chat-header { padding: 8px 12px; gap: 8px; }
+  #chapter-title-input { font-size: 14px; }
+  .ch-meta { font-size: 10px; }
+
+  /* ── Messages: comfortable mobile reading ── */
+  #messages { padding: 14px 14px; gap: 14px; }
+  .msg-bubble { max-width: 92% !important; font-size: 15px; padding: 10px 13px; }
+  .msg-bubble.assistant.long { max-width: 98% !important; }
+
+  /* ── Input area: full width, bigger touch targets ── */
+  #input-area { padding: 8px 10px 12px; }
+
+  /* Hide input controls row on mobile — accessible via settings */
+  .input-controls { display: none; }
+
+  /* Quick prompts: horizontal scroll instead of wrap */
+  .quick-btns {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+    margin-bottom: 6px;
+  }
+  .quick-btns::-webkit-scrollbar { display: none; }
+  .qb { flex-shrink: 0; padding: 4px 12px; font-size: 13px; }
+
+  /* Input row: bigger send button */
+  .input-row { gap: 6px; }
+  #user-input { font-size: 16px; padding: 10px 12px; min-height: 44px; }
+  #send-btn { width: 44px; height: 44px; font-size: 17px; }
+  #voice-btn { width: 44px; height: 44px; }
+
+  .input-hint { display: none; }
+
+  /* ── No project screen ── */
+  #no-project-screen { padding: 20px 16px; }
+  .np-hero { font-size: 24px; }
+  .np-card { padding: 18px 18px; }
+
+  /* ── Onboarding: tighter padding ── */
+  .ob-card { padding: 20px 18px; }
+  .ob-logo { font-size: 40px; }
+  .ob-tagline { font-size: 9px; margin-bottom: 16px; }
+  .gemini-hero { padding: 16px; }
+  .gh-title { font-size: 17px; }
+  .gh-input-row { flex-direction: column; gap: 8px; }
+  .gh-input-row input { font-size: 14px; padding: 12px; }
+  .gh-input-row button { width: 100%; padding: 13px; font-size: 16px; }
+
+  /* ── Modal: full-screen on mobile ── */
+  #modal-overlay { align-items: flex-end; padding: 0; }
+  .modal {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 16px 16px 0 0;
+    padding: 20px 18px 32px;
+    max-height: 90vh;
+  }
+
+  /* ── Mobile bottom nav bar ── */
+  #mobile-nav {
+    display: flex !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    z-index: 300;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 4px;
+  }
+  .mnav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    background: none;
+    border: none;
+    color: var(--text4);
+    cursor: pointer;
+    padding: 6px 14px;
+    border-radius: var(--radius);
+    transition: color 0.15s;
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    min-width: 56px;
+  }
+  .mnav-btn:hover, .mnav-btn.active { color: var(--gold); }
+  .mnav-btn .mnav-icon { font-size: 20px; line-height: 1; }
+
+  /* Push content above bottom nav */
+  #app { padding-bottom: 56px; }
+
+  /* ── Continuity strip ── */
+  #continuity-strip { font-size: 10px; padding: 5px 12px; }
+}
+
+/* ── Very small phones (iPhone SE etc) ── */
+@media (max-width: 375px) {
+  .ob-card { padding: 16px 14px; }
+  .gemini-hero { padding: 13px; }
+  #messages { padding: 10px 10px; }
+  .msg-bubble { font-size: 14px; }
+}
+
+/* ── Tablet (769–1024px): sidebar visible, codex hidden ── */
+@media (min-width: 769px) and (max-width: 1024px) {
+  #codex-panel { display: none; }
+  #sidebar { width: 200px; }
+  .tb-div:nth-child(4) { display: none; }
+  .free-pill { display: none; }
+}
+
+/* ── Desktop only elements — hidden on mobile ── */
+#mobile-nav { display: none; }
+#tb-hamburger { display: none; }
+#sidebar-overlay { display: none; }
+</style>
+</head>
+<body>
+
+<!-- ══════════ ONBOARDING ══════════ -->
+<div id="onboarding-screen" class="screen">
+  <div class="ob-wrap">
+
+    <!-- STEP 0: Gemini-first welcome -->
+    <div class="ob-step active" id="ob-0">
+      <div class="ob-logo">AI Lekhani</div>
+      <div class="ob-tagline">लेखनी · Write your story, in your language</div>
+
+      <div class="ob-card">
+        <!-- Gemini hero — primary CTA -->
+        <div class="gemini-hero">
+          <div class="gh-top">
+            <div class="gh-badge">FREE · NO CARD NEEDED</div>
+            <div class="gh-title">Start writing in 90 seconds with Gemini</div>
+            <div class="gh-sub">Google's AI is completely free to start. No credit card, no billing setup. Just create a key and write.</div>
+          </div>
+
+          <div class="gh-steps">
+            <div class="gh-step">
+              <div class="gh-num">1</div>
+              <div class="gh-text">
+                <a href="https://aistudio.google.com/app/apikey" target="_blank" class="gh-link">
+                  Open aistudio.google.com →
+                </a>
+                <span class="gh-hint">Sign in with your Google account</span>
+              </div>
+            </div>
+            <div class="gh-step">
+              <div class="gh-num">2</div>
+              <div class="gh-text">
+                <span class="gh-action">Click "Get API Key" → "Create API key"</span>
+                <span class="gh-hint">Takes about 30 seconds</span>
+              </div>
+            </div>
+            <div class="gh-step">
+              <div class="gh-num">3</div>
+              <div class="gh-text">
+                <span class="gh-action">Paste it below and start writing</span>
+                <span class="gh-hint">Stored only in your browser — never on any server</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="gh-input-row">
+            <input type="text" id="gemini-key-input"
+              placeholder="Paste your Gemini key here (AIza…)"
+              oninput="onGeminiKeyInput(this.value)"
+              autocomplete="off" spellcheck="false"/>
+            <button id="gemini-go-btn" onclick="startWithGemini()" disabled>
+              Start Writing →
+            </button>
+          </div>
+          <div id="gemini-key-status" class="gh-status"></div>
+        </div>
+
+        <!-- Divider -->
+        <div class="ob-divider">
+          <span>or use a paid AI provider</span>
+        </div>
+
+        <!-- Secondary options — Claude + ChatGPT -->
+        <div class="paid-options">
+          <div class="paid-card" onclick="goToPaidSetup('anthropic')">
+            <span class="paid-logo">🟠</span>
+            <div class="paid-info">
+              <div class="paid-name">Claude</div>
+              <div class="paid-cost">~₹2/session · Best prose quality</div>
+            </div>
+            <span class="paid-arrow">→</span>
+          </div>
+          <div class="paid-card" onclick="goToPaidSetup('openai')">
+            <span class="paid-logo">⚫</span>
+            <div class="paid-info">
+              <div class="paid-name">ChatGPT</div>
+              <div class="paid-cost">~₹3/session · Very creative</div>
+            </div>
+            <span class="paid-arrow">→</span>
+          </div>
+        </div>
+
+        <button class="ob-skip" onclick="obSkip()">
+          I'll add a key later →
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 1: Paid provider key entry (Claude or ChatGPT) -->
+    <div class="ob-step" id="ob-1">
+      <div class="ob-logo" id="paid-logo">🟠</div>
+      <div class="ob-tagline" id="paid-tagline">Connect Claude</div>
+      <div class="ob-card">
+        <h2 id="paid-title">Enter your Claude API key</h2>
+        <p id="paid-desc">Your key is stored only in your browser and never sent to any server.</p>
+
+        <div class="paid-key-box">
+          <div class="pkb-hint" id="paid-key-hint"></div>
+          <div class="key-wrap" style="margin-top:10px;">
+            <input type="password" id="paid-api-key"
+              placeholder="" oninput="onPaidKeyInput(this.value)"
+              autocomplete="off" spellcheck="false"/>
+            <button class="key-toggle" onclick="toggleVis('paid-api-key',this)">show</button>
+          </div>
+          <div class="key-st" id="paid-key-status"></div>
+        </div>
+
+        <button class="ob-btn" id="paid-key-btn" onclick="startWithPaid()" disabled>
+          Start Writing →
+        </button>
+        <button class="ob-skip" onclick="obGoStep(0)">← Back</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Language (shown after key is set) -->
+    <div class="ob-step" id="ob-2">
+      <div class="ob-logo">भाषा</div>
+      <div class="ob-tagline">Choose your writing language</div>
+      <div class="ob-card">
+        <h2>Which language will you write in?</h2>
+        <p style="color:var(--text3);font-size:14px;margin-bottom:16px;line-height:1.7;">
+          You can change this per book project. The AI will write all prose in your chosen language.
+        </p>
+
+        <div class="lang-grid">
+          <div class="lcard selected" id="lcard-en" onclick="selectLang('en')">
+            <div class="lc-check">✓</div>
+            <div class="lc-flag">🇬🇧</div>
+            <div class="lc-name">English</div>
+            <div class="lc-sub">Global reach</div>
+          </div>
+          <div class="lcard" id="lcard-hi" onclick="selectLang('hi')">
+            <div class="lc-check">✓</div>
+            <div class="lc-flag">🇮🇳</div>
+            <div class="lc-name" style="font-family:'Noto Sans Devanagari',sans-serif;">हिंदी</div>
+            <div class="lc-sub">Hindi</div>
+          </div>
+          <div class="lcard" id="lcard-ta" onclick="selectLang('ta')">
+            <div class="lc-check">✓</div>
+            <div class="lc-flag">🌴</div>
+            <div class="lc-name" style="font-family:'Noto Sans Tamil',sans-serif;">தமிழ்</div>
+            <div class="lc-sub">Tamil</div>
+          </div>
+        </div>
+
+        <div id="lang-detail"
+          style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);
+                 padding:10px 13px;margin-bottom:14px;font-size:13px;color:var(--text3);font-style:italic;">
+        </div>
+
+        <button class="ob-btn" onclick="finishOnboarding()">
+          Open AI Lekhani →
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════ MAIN APP ══════════ -->
+<div id="topbar" style="display:none;">
+  <!-- Hamburger — mobile only -->
+  <button id="tb-hamburger" onclick="toggleSidebar()"
+    style="background:none;border:none;color:var(--text3);cursor:pointer;
+           font-size:20px;padding:4px 6px;line-height:1;display:none;">
+    ☰
+  </button>
+  <div class="logo-mark">AI Lekhani</div>
+  <div class="tb-div"></div>
+  <span id="project-name-display"></span>
+  <div class="tb-spacer"></div>
+
+  <!-- Language switcher -->
+  <div class="tb-selector" onclick="openLangSwitcher()" title="Switch writing language" id="lang-selector">
+    <span id="lang-flag">🇬🇧</span>
+    <span id="lang-label-tb" style="font-size:11px;">EN</span>
+  </div>
+
+  <!-- Model switcher -->
+  <div class="tb-selector" onclick="openModelSwitcher()" title="Switch AI model" id="model-selector">
+    <div class="ts-dot" id="model-dot"></div>
+    <span id="model-label-tb">Claude Sonnet</span>
+  </div>
+
+  <div class="free-pill" onclick="openUpgrade()">FREE</div>
+  <div class="tb-div"></div>
+  <button class="tb-btn" onclick="openProjects()">📚 Books</button>
+  <button class="tb-btn" onclick="newProject()">+ New</button>
+  <button class="tb-btn" id="auth-btn" onclick="loginWithGoogle()" title="Sign in with Google">Sign in</button>
+  <button class="tb-btn" onclick="openSettings()">⚙</button>
+  <button class="tb-btn" onclick="toggleCodex()">📖 Codex</button>
+  <button class="tb-btn primary" id="export-btn" onclick="exportChapter()" style="display:none;">↓ Export</button>
+</div>
+
+<!-- Sidebar overlay — mobile only -->
+<div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<!-- Mobile bottom navigation bar -->
+<div id="mobile-nav">
+  <button class="mnav-btn" onclick="toggleSidebar()">
+    <span class="mnav-icon">📚</span>
+    <span>Chapters</span>
+  </button>
+  <button class="mnav-btn" id="mnav-write" onclick="closeSidebar();closeCodex();">
+    <span class="mnav-icon">✍️</span>
+    <span>Write</span>
+  </button>
+  <button class="mnav-btn" onclick="toggleCodexMobile()">
+    <span class="mnav-icon">📖</span>
+    <span>Codex</span>
+  </button>
+  <button class="mnav-btn" onclick="openVoiceDrawer()">
+    <span class="mnav-icon">🎤</span>
+    <span>Voice</span>
+  </button>
+  <button class="mnav-btn" onclick="openSettings()">
+    <span class="mnav-icon">⚙️</span>
+    <span>Settings</span>
+  </button>
+</div>
+
+<div id="app" style="display:none;">
+  <div id="sidebar">
+    <div class="sb-section">Chapters <button class="sb-add" onclick="addChapter()">+</button></div>
+    <div class="sb-list" id="chapters-list"></div>
+    <div class="sb-bottom">
+      <div class="sb-status" onclick="openSettings()">
+        <div class="sb-dot" id="sb-ai-dot"></div>
+        <span id="sb-ai-text">Claude · key set</span>
+      </div>
+      <div class="sb-status" onclick="openExportImport()">
+        <span>💾</span><span id="sb-backup-label">Backup / Restore</span>
+      </div>
+      <div class="sb-status" onclick="openDeviceSecurity()" id="sb-device-status">
+        <span>🔐</span><span id="sb-device-label">Device security</span>
+      </div>
+      <div class="sb-status" onclick="openUpgrade()">
+        <span>⭐</span><span>Upgrade to Pro</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="center">
+    <div id="no-project-screen">
+      <div class="np-hero">अपनी कहानी लिखें</div>
+      <div class="np-sub">Create a new book project. Everything saves automatically, privately.</div>
+      <div class="np-card">
+        <div class="np-field"><label>Book Title</label><input type="text" id="np-title" placeholder="e.g. The Crimson Meridian · लाल क्षितिज"/></div>
+        <div class="np-field"><label>Genre / Style</label><input type="text" id="np-genre" placeholder="e.g. Dark fantasy · थ्रिलर · நாவல்"/></div>
+        <div class="np-field">
+          <label>Writing Language</label>
+          <select id="np-lang">
+            <option value="en">English</option>
+            <option value="hi">हिंदी (Hindi)</option>
+            <option value="ta">தமிழ் (Tamil)</option>
+          </select>
+        </div>
+        <div class="np-field"><label>One-line premise</label><textarea id="np-premise" placeholder="e.g. A disgraced cartographer discovers every map she draws predicts the future…"></textarea></div>
+        <button class="np-btn" onclick="createProject()">✦ Create Book Project</button>
+      </div>
+    </div>
+
+    <div id="chat-area" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+      <div id="chat-header">
+        <input id="chapter-title-input" type="text" placeholder="Chapter title…" onblur="saveChapterTitle(this.value)"/>
+        <span class="ch-meta" id="ch-meta"></span>
+      </div>
+      <div id="messages"></div>
+      <div id="input-area">
+        <!-- Quick prompts -->
+        <div class="quick-btns" id="quick-btns"></div>
+
+        <!-- Input language + model controls -->
+        <div class="input-controls">
+          <span class="ic-label">INPUT LANG</span>
+          <select class="ic-select" id="input-lang-select" onchange="setInputLang(this.value)" title="Language for your prompts">
+            <option value="en">🇬🇧 English</option>
+            <option value="hi">🇮🇳 Hindi</option>
+            <option value="ta">🌴 Tamil</option>
+            <option value="auto">⚡ Auto-detect</option>
+          </select>
+          <div class="ic-divider"></div>
+          <span class="ic-label">MODEL</span>
+          <select class="ic-select" id="model-select" onchange="setModel(this.value)" title="Select AI model">
+            <!-- populated by JS -->
+          </select>
+          <div class="ic-divider"></div>
+          <span class="ic-label" id="token-estimate" style="color:var(--gold-dim);"></span>
+        </div>
+
+        <div class="input-row">
+          <textarea id="user-input" rows="2" placeholder="Describe what happens, or say 'draft this chapter'…" onkeydown="handleKey(event)" oninput="autoResize(this);updateTokenEstimate();"></textarea>
+          <button id="send-btn" onclick="sendMessage()" disabled>➤</button>
+        </div>
+        <div class="input-hint">Enter to send · Shift+Enter for new line · Full codex attached · <span style="color:var(--gold-dim);cursor:pointer" onclick="openModelSwitcher()">Switch model ↑</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="codex-panel">
+    <div class="cx-header">
+      <h3>Story Codex</h3>
+      <button class="tb-btn" onclick="toggleCodex()" style="padding:2px 7px;font-size:10px;">✕</button>
+    </div>
+    <div class="cx-tabs">
+      <button class="cx-tab active" onclick="switchCx('characters',this)">Cast</button>
+      <button class="cx-tab" onclick="switchCx('plot',this)">Plot</button>
+      <button class="cx-tab" onclick="switchCx('timeline',this)">Time</button>
+      <button class="cx-tab" onclick="switchCx('world',this)">World</button>
+    </div>
+    <div class="cx-content">
+      <div class="cx-label" id="cx-label">Characters</div>
+      <textarea class="cx-ta" id="cx-ta" style="height:calc(100vh - 286px)" oninput="cxDirty=true"></textarea>
+      <button class="cx-save" onclick="saveCodex()">Save to Codex</button>
+      <div class="cx-saved" id="cx-saved"></div>
+    </div>
+  </div>
+</div>
+
+<div id="modal-overlay"><div class="modal" id="modal-content"></div></div>
+<div id="toast"></div>
+
+<script src="js/schema.js"></script>
+<script src="js/multilingual.js"></script>
+<script src="js/context.js"></script>
+<script src="js/extractor.js"></script>
+<script src="js/continuity.js"></script>
+<script src="js/voice.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/plans.js"></script>
+<script src="js/auth.js"></script>
+
+<script>
+// ── Inline: providers, model fetch, API gateway, app logic ──
+// ─────────────────────────────────────────
+// PROVIDERS — static config (no model IDs hardcoded)
+// ─────────────────────────────────────────
+const PROVIDERS = {
+  anthropic:{
+    name:'Claude', logo:'🟠', color:'#c47a30',
+    placeholder:'sk-ant-api03-…', prefix:'sk-ant-',
+    hint:'Get key: <a href="https://console.anthropic.com/keys" target="_blank">console.anthropic.com/keys</a>',
+    billingUrl:'https://console.anthropic.com/billing',
+    // Preferred model keywords — used to pick best from live list
+    preferKeywords:['sonnet','claude-3-5','claude-3-7'],
+    avoidKeywords:['instant','legacy'],
+  },
+  openai:{
+    name:'ChatGPT', logo:'⚫', color:'#10a37f',
+    placeholder:'sk-proj-…', prefix:'sk-',
+    hint:'Get key: <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com/api-keys</a>',
+    billingUrl:'https://platform.openai.com/billing',
+    preferKeywords:['gpt-4o','gpt-4.1','gpt-4-turbo'],
+    avoidKeywords:['instruct','realtime','audio','vision','tts','whisper','dall','embedding','moderation','babbage','davinci','curie','ada'],
+  },
+  gemini:{
+    name:'Gemini', logo:'🔵', color:'#4285f4',
+    placeholder:'AIza…', prefix:'AIza',
+    hint:'Free key (no card): <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a>',
+    billingUrl:'https://aistudio.google.com',
+    preferKeywords:['gemini-2.5-pro','gemini-2.5-flash','gemini-2.0-flash','gemini-pro'],
+    avoidKeywords:['embedding','aqa','vision','1.0','1.5'],
+  }
+};
+
+// ─────────────────────────────────────────
+// LIVE MODEL CACHE — fetched from APIs using user's key
+// { anthropic: [{id, name, displayName}], openai: [...], gemini: [...] }
+// ─────────────────────────────────────────
+let MODEL_CACHE = { anthropic:[], openai:[], gemini:[] };
+let MODEL_FETCH_STATUS = { anthropic:'idle', openai:'idle', gemini:'idle' };
+
+// Fetch available models from Anthropic API
+async function fetchAnthropicModels(key){
+  const r = await fetch('https://api.anthropic.com/v1/models',{
+    headers:{'x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'}
+  });
+  const d = await r.json();
+  if(d.error) throw new Error(d.error.message);
+  // Filter to text generation models only, sort newest first
+  const models = (d.data||[])
+    .filter(m => !m.id.includes('embedding'))
+    .sort((a,b) => b.id.localeCompare(a.id))
+    .map(m => ({
+      id: m.id,
+      name: m.display_name || prettifyModelId(m.id, 'anthropic'),
+      raw: m
+    }));
+  return models;
+}
+
+// Fetch available models from OpenAI API
+async function fetchOpenAIModels(key){
+  const r = await fetch('https://api.openai.com/v1/models',{
+    headers:{'Authorization':'Bearer '+key}
+  });
+  const d = await r.json();
+  if(d.error) throw new Error(d.error.message);
+  const pv = PROVIDERS.openai;
+  const models = (d.data||[])
+    .filter(m => {
+      // Keep only chat/text generation models
+      const id = m.id.toLowerCase();
+      const isAvoided = pv.avoidKeywords.some(k => id.includes(k));
+      const isChat = id.startsWith('gpt-') || id.startsWith('o1') || id.startsWith('o3') || id.startsWith('o4') || id === 'chatgpt-4o-latest';
+      return isChat && !isAvoided;
+    })
+    .sort((a,b) => b.created - a.created) // newest first
+    .map(m => ({
+      id: m.id,
+      name: prettifyModelId(m.id, 'openai'),
+      raw: m
+    }));
+  return models;
+}
+
+// Fetch available models from Gemini API
+async function fetchGeminiModels(key){
+  const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
+  const d = await r.json();
+  if(d.error) throw new Error(d.error.message||JSON.stringify(d.error));
+  const pv = PROVIDERS.gemini;
+  const models = (d.models||[])
+    .filter(m => {
+      const id = (m.name||'').replace('models/','').toLowerCase();
+      const isAvoided = pv.avoidKeywords.some(k => id.includes(k));
+      // Only keep generateContent-capable models
+      const canGenerate = (m.supportedGenerationMethods||[]).includes('generateContent');
+      return canGenerate && !isAvoided;
+    })
+    .sort((a,b) => {
+      // Sort: prefer newer versions
+      const aId = a.name||'', bId = b.name||'';
+      return bId.localeCompare(aId);
+    })
+    .map(m => ({
+      id: m.name.replace('models/',''),
+      name: m.displayName || prettifyModelId(m.name.replace('models/',''), 'gemini'),
+      raw: m
+    }));
+  return models;
+}
+
+// Make a model ID human-readable
+function prettifyModelId(id, provider){
+  return id
+    .replace(/-\d{8}$/, '')         // remove date suffixes like -20250514
+    .replace(/-preview.*$/, ' (Preview)')
+    .replace(/-latest$/, ' (Latest)')
+    .replace('claude-', 'Claude ')
+    .replace('gpt-4o', 'GPT-4o')
+    .replace('gpt-4.1', 'GPT-4.1')
+    .replace('gpt-4-turbo', 'GPT-4 Turbo')
+    .replace('o3-mini', 'o3 Mini')
+    .replace('o4-mini', 'o4 Mini')
+    .replace('gemini-', 'Gemini ')
+    .replace(/-/g, ' ')
+    .replace(/\b\w/g, l => l.toUpperCase())
+    .replace('  ', ' ')
+    .trim();
+}
+
+// Fetch models for a provider and cache them
+async function fetchModels(provider){
+  const key = S.keys[provider];
+  if(!key) return;
+  if(MODEL_FETCH_STATUS[provider] === 'loading') return;
+  MODEL_FETCH_STATUS[provider] = 'loading';
+  try{
+    let models = [];
+    if(provider === 'anthropic') models = await fetchAnthropicModels(key);
+    else if(provider === 'openai') models = await fetchOpenAIModels(key);
+    else if(provider === 'gemini') models = await fetchGeminiModels(key);
+    MODEL_CACHE[provider] = models;
+    MODEL_FETCH_STATUS[provider] = 'done';
+    // Auto-select best model from live list if not already set or set to placeholder
+    const current = S.activeModel;
+    const currentInList = models.find(m => m.id === current);
+    if(!currentInList && provider === S.activeProvider){
+      S.activeModel = pickBestModel(provider);
+      save();
+    }
+    populateModelSelect();
+    updateModelBadge();
+  } catch(e){
+    MODEL_FETCH_STATUS[provider] = 'error';
+    console.warn('Model fetch failed for', provider, e.message);
+    // Fall back to a safe default if fetch fails
+    if(provider === S.activeProvider && !S.activeModel){
+      S.activeModel = PROVIDERS[provider].preferKeywords[0] || 'default';
+    }
+  }
+}
+
+// Pick best model from the live cache for a provider
+function pickBestModel(provider){
+  const models = MODEL_CACHE[provider];
+  if(!models || !models.length) return null;
+  const pv = PROVIDERS[provider];
+  // Try preferred keywords in order
+  for(const keyword of pv.preferKeywords){
+    const match = models.find(m => m.id.toLowerCase().includes(keyword.toLowerCase()));
+    if(match) return match.id;
+  }
+  // Fall back to first available
+  return models[0]?.id || null;
+}
+
+// Get display info for a model ID (from cache or prettify)
+function getModelInfo(modelId, provider){
+  const prov = provider || S.activeProvider;
+  const cached = MODEL_CACHE[prov]?.find(m => m.id === modelId);
+  if(cached) return cached;
+  // Not in cache yet — return basic info
+  return { id: modelId, name: prettifyModelId(modelId, prov) };
+}
+
+const LANG_CONFIG = {
+  en:{ flag:'🇬🇧', label:'EN', name:'English', font:'', sys:'Write all prose, dialogue, and narration in English.' },
+  hi:{ flag:'🇮🇳', label:'HI', name:'हिंदी', font:'Noto Sans Devanagari', sys:'सभी गद्य, संवाद और वर्णन हिंदी में लिखें। यह एक हिंदी उपन्यास है।' },
+  ta:{ flag:'🌴', label:'TA', name:'தமிழ்', font:'Noto Sans Tamil', sys:'அனைத்து உரைநடை மற்றும் உரையாடல்களை தமிழில் எழுதவும்.' }
+};
+
+const QUICK_PROMPTS = {
+  en:['✍️ Draft chapter','→ Continue','🔥 Add tension','▶ Next scene','📋 Summarise'],
+  hi:['✍️ अध्याय लिखें','→ जारी रखें','🔥 तनाव बढ़ाएं','▶ अगला दृश्य','📋 सारांश'],
+  ta:['✍️ அத்தியாயம் எழுதவும்','→ தொடரவும்','🔥 பதற்றம் சேர்க்கவும்','▶ அடுத்த காட்சி','📋 சுருக்கம்']
+};
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+
+// ═══════════════════════════════════════════
+// DEVICE FINGERPRINTING
+// ═══════════════════════════════════════════
+function getDeviceFingerprint(){
+  // Creates a reasonably unique device ID from stable browser properties
+  const nav = window.navigator;
+  const parts = [
+    nav.language,
+    nav.platform,
+    screen.width + 'x' + screen.height,
+    screen.colorDepth,
+    new Date().getTimezoneOffset(),
+    nav.hardwareConcurrency || 0,
+    nav.deviceMemory || 0,
+  ].join('|');
+  // Simple hash
+  let hash = 0;
+  for(let i=0;i<parts.length;i++){
+    const c = parts.charCodeAt(i);
+    hash = ((hash << 5) - hash) + c;
+    hash = hash & hash;
+  }
+  return 'dev_' + Math.abs(hash).toString(36);
+}
+
+function getDeviceName(){
+  const ua = navigator.userAgent;
+  if(/iPhone/.test(ua)) return 'iPhone';
+  if(/iPad/.test(ua)) return 'iPad';
+  if(/Android.*Mobile/.test(ua)) return 'Android Phone';
+  if(/Android/.test(ua)) return 'Android Tablet';
+  if(/Mac/.test(ua)) return 'Mac';
+  if(/Windows/.test(ua)) return 'Windows PC';
+  if(/Linux/.test(ua)) return 'Linux';
+  return 'Browser';
+}
+
+function registerDevice(){
+  const fp = getDeviceFingerprint();
+  S.deviceId = fp;
+  const now = new Date().toISOString();
+  const existing = S.devices.find(d => d.id === fp);
+  if(existing){
+    existing.lastSeen = now;
+    existing.isCurrent = true;
+  } else {
+    S.devices.push({ id:fp, name:getDeviceName(), firstSeen:now, lastSeen:now, isCurrent:true });
+  }
+  // Mark all others as not current
+  S.devices.forEach(d => { if(d.id !== fp) d.isCurrent = false; });
+
+  // Security check: if Pro and more than 3 devices have been active in last 7 days
+  if(S.plan === 'pro'){
+    const weekAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString();
+    const recentDevices = S.devices.filter(d => d.lastSeen > weekAgo);
+    if(recentDevices.length > 3){
+      showDeviceSecurityWarning();
+    }
+  }
+  save();
+}
+
+function showDeviceSecurityWarning(){
+  // Show warning in sidebar
+  const el = document.getElementById('sb-device-label');
+  if(el){ el.textContent = '⚠ Multiple devices detected'; el.style.color = 'var(--red)'; }
+}
+
+function openDeviceSecurity(){
+  const devices = S.devices.sort((a,b) => b.lastSeen.localeCompare(a.lastSeen));
+  const weekAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString();
+  const recentCount = devices.filter(d => d.lastSeen > weekAgo).length;
+  const isWarning = S.plan === 'pro' && recentCount > 3;
+
+  document.getElementById('modal-content').innerHTML = `
+    <h2>🔐 Device Security</h2>
+    <p style="font-size:13px;color:var(--text3);margin-bottom:12px;font-style:italic;">
+      Devices that have accessed AI Lekhani with your data. On the free plan, data is browser-only so this is informational. On Pro, more than 3 active devices in 7 days may indicate key sharing.
+    </p>
+    ${isWarning ? `<div class="security-warning">⚠ WARNING: ${recentCount} devices active in the last 7 days. This may indicate your licence key is being shared. Consider revoking unknown devices.</div>` : ''}
+    <div class="device-list">
+      ${devices.map(d => `
+        <div class="device-row">
+          <span class="device-icon">${d.name.includes('iPhone')||d.name.includes('Android Phone')?'📱':'💻'}</span>
+          <div class="device-info">
+            <div class="device-name">${esc(d.name)} <code>${d.id.slice(0,12)}</code></div>
+            <div class="device-date">First: ${new Date(d.firstSeen).toLocaleDateString('en-IN')} · Last: ${new Date(d.lastSeen).toLocaleDateString('en-IN')}</div>
+          </div>
+          ${d.isCurrent ? '<span class="device-current">THIS DEVICE</span>' : `<button class="device-revoke" onclick="revokeDevice('${d.id}')">Revoke</button>`}
+        </div>`).join('')}
+    </div>
+    <div style="margin-top:12px;font-size:11px;color:var(--text4);font-family:'JetBrains Mono',monospace;line-height:1.6;">
+      Your current device ID: <code>${S.deviceId || 'unknown'}</code><br>
+      Revoking a device removes it from this list — it cannot delete someone else's local data, but on Pro it signals the server to deny that device's licence check.
+    </div>
+    <div class="modal-row"><button class="modal-cancel" onclick="closeModal()">Close</button></div>`;
+  openModal();
+}
+
+function revokeDevice(id){
+  S.devices = S.devices.filter(d => d.id !== id);
+  save();
+  openDeviceSecurity();
+  toast('Device removed ✓');
+}
+
+// ═══════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════
+load();
+registerDevice();
+if(S.onboarded){ showApp(); } else { showOnboarding(); }
+
+function showOnboarding(){
+  document.getElementById('onboarding-screen').classList.remove('hidden');
+  document.getElementById('topbar').style.display = 'none';
+  document.getElementById('app').style.display = 'none';
+  obGoStep(0); renderLangDetail('en');
+}
+function showApp(){
+  document.getElementById('onboarding-screen').classList.add('hidden');
+  document.getElementById('topbar').style.display = 'flex';
+  document.getElementById('app').style.display = 'flex';
+  // Fetch models from all providers that have keys — runs in background
+  Object.keys(PROVIDERS).forEach(pid => {
+    if(S.keys[pid] && S.keys[pid].trim()){
+      fetchModels(pid); // async, non-blocking
+    }
+  });
+  populateModelSelect();
+  renderApp();
+}
+
+
+// ── Onboarding state ──
+let obSelProvider = 'gemini';
+let obSelLang = 'en';
+let _pendingKey = '';
+
+
+function obGoStep(n){
+  document.querySelectorAll('.ob-step').forEach((el,i)=>el.classList.toggle('active',i===n));
+}
+
+// ── Step 0: Gemini key input ──────────────────────────────────────
+function onGeminiKeyInput(val){
+  const btn = document.getElementById('gemini-go-btn');
+  const st  = document.getElementById('gemini-key-status');
+  _pendingKey = val.trim();
+
+  if(!val){st.textContent='';st.className='gh-status';btn.disabled=true;return;}
+
+  if(val.trim().startsWith('AIza') && val.trim().length > 20){
+    st.textContent='✓ Key looks correct — ready to write';
+    st.className='gh-status valid';
+    btn.disabled=false;
+  } else if(val.trim().length > 8){
+    st.textContent='Gemini keys start with "AIza" — double-check your copy';
+    st.className='gh-status invalid';
+    btn.disabled=true;
+  } else {
+    st.textContent='';st.className='gh-status';btn.disabled=true;
+  }
+}
+
+function startWithGemini(){
+  const val = document.getElementById('gemini-key-input').value.trim();
+  if(!val) return;
+  S.keys.gemini    = val;
+  S.activeProvider = 'gemini';
+  S.activeModel    = pickBestModel('gemini') || '';
+  obSelProvider    = 'gemini';
+  _pendingKey      = '';
+  // Go to language step
+  renderLangDetail('en');
+  obGoStep(2);
+}
+
+// ── Step 1: Paid provider setup ───────────────────────────────────
+function goToPaidSetup(provider){
+  if(!canUseProvider(provider)){showProviderLockPrompt(provider);return;}
+  obSelProvider = provider;
+  const pv = PROVIDERS[provider];
+
+  document.getElementById('paid-logo').textContent    = pv.logo;
+  document.getElementById('paid-tagline').textContent = 'Connect ' + pv.name;
+  document.getElementById('paid-title').textContent   = 'Enter your ' + pv.name + ' API key';
+  document.getElementById('paid-desc').textContent    =
+    'Your key is stored only in your browser and never sent to any server. ' +
+    'You pay ' + pv.name + ' directly — AI Lekhani never sees your billing.';
+  document.getElementById('paid-key-hint').innerHTML  =
+    'Get your key at <a href="' + (pv.billingUrl||'#') + '" target="_blank">' +
+    (pv.billingUrl||'the provider website').replace('https://','') + '</a>';
+  document.getElementById('paid-api-key').placeholder = pv.placeholder || '';
+  document.getElementById('paid-api-key').value       = S.keys[provider] || '';
+  document.getElementById('paid-key-status').textContent = '';
+  document.getElementById('paid-key-status').className   = 'key-st';
+  document.getElementById('paid-key-btn').disabled       = !S.keys[provider];
+
+  if(S.keys[provider]){
+    document.getElementById('paid-key-status').className   = 'key-st valid';
+    document.getElementById('paid-key-status').textContent = '✓ Key already saved';
+  }
+  obGoStep(1);
+}
+
+function onPaidKeyInput(val){
+  const pv  = PROVIDERS[obSelProvider];
+  const btn = document.getElementById('paid-key-btn');
+  const st  = document.getElementById('paid-key-status');
+  if(!val){st.textContent='';st.className='key-st';btn.disabled=true;return;}
+  if(val.startsWith(pv.prefix||'') && val.length > 16){
+    st.className='key-st valid';st.textContent='✓ Format looks correct';btn.disabled=false;
+  } else if(val.length > 8){
+    st.className='key-st invalid';
+    st.textContent='Should start with "' + (pv.prefix||'?') + '" — check your copy';
+    btn.disabled=true;
+  } else {
+    st.textContent='';st.className='key-st';btn.disabled=true;
+  }
+}
+
+function startWithPaid(){
+  const val = document.getElementById('paid-api-key').value.trim();
+  if(!val) return;
+  S.keys[obSelProvider]  = val;
+  S.activeProvider       = obSelProvider;
+  S.activeModel          = pickBestModel(obSelProvider) || '';
+  renderLangDetail('en');
+  obGoStep(2);
+}
+
+// ── Step 2: Language ──────────────────────────────────────────────
+function selectLang(lang){
+  obSelLang = lang;
+  ['en','hi','ta'].forEach(l =>
+    document.getElementById('lcard-'+l).classList.toggle('selected', l===lang)
+  );
+  renderLangDetail(lang);
+}
+
+function renderLangDetail(lang){
+  const msgs = {
+    en: 'The AI will write all prose, dialogue, and narration in English.',
+    hi: 'AI सभी गद्य, संवाद और वर्णन हिंदी में लिखेगा।',
+    ta: 'AI அனைத்தையும் தமிழில் எழுதும்.'
+  };
+  const el = document.getElementById('lang-detail');
+  if(el) el.textContent = msgs[lang] || msgs.en;
+}
+
+function finishOnboarding(){
+  S.writingLang = obSelLang;
+  S.inputLang   = obSelLang;
+  S.onboarded   = true;
+  save();
+  // Fetch models for active provider in background
+  if(S.keys[S.activeProvider]) fetchModels(S.activeProvider);
+  showApp();
+}
+
+// ── Skip — add key later ──────────────────────────────────────────
+function obSkip(){
+  // Default to Gemini if no key set — prompt will guide them to Settings
+  if(!Object.values(S.keys).some(k=>k&&k.trim())){
+    S.activeProvider = 'gemini';
+  }
+  S.writingLang = 'en';
+  S.inputLang   = 'en';
+  S.onboarded   = true;
+  save();
+  showApp();
+  // Show a gentle nudge after app loads
+  setTimeout(()=>toast('Add a Gemini key in ⚙ Settings to start writing (it\'s free!)'), 1200);
+}
+
+
+// ═══════════════════════════════════════════
+// LANGUAGE SWITCHER API
+// ═══════════════════════════════════════════
+function openLangSwitcher(){
+  document.getElementById('modal-content').innerHTML = `
+    <h2>Switch Writing Language</h2>
+    <p style="font-size:13px;color:var(--text3);margin-bottom:14px;font-style:italic;">The AI will write all prose, dialogue, and narration in the selected language. Your prompts can be in any language.</p>
+    <div class="lang-grid" style="margin-bottom:0;">
+      ${['en','hi','ta'].map(l=>{
+        const lc=LANG_CONFIG[l];
+        return`<div class="lcard ${S.writingLang===l?'selected':''}" onclick="switchWritingLang('${l}')">
+          ${S.writingLang===l?'<div class="lc-check">✓</div>':''}
+          <div class="lc-flag">${lc.flag}</div>
+          <div class="lc-name" ${lc.font?`style="font-family:'${lc.font}',sans-serif;"`:''}>${lc.name}</div>
+          <div class="lc-sub">${l.toUpperCase()}</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div style="margin-top:14px;">
+      <div style="font-size:11px;color:var(--text4);font-family:'JetBrains Mono',monospace;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.1em;">Input language (your prompts)</div>
+      <select class="ic-select" style="width:100%;" onchange="setInputLang(this.value)">
+        <option value="en" ${S.inputLang==='en'?'selected':''}>🇬🇧 English</option>
+        <option value="hi" ${S.inputLang==='hi'?'selected':''}>🇮🇳 Hindi</option>
+        <option value="ta" ${S.inputLang==='ta'?'selected':''}>🌴 Tamil</option>
+        <option value="auto" ${S.inputLang==='auto'?'selected':''}>⚡ Auto-detect</option>
+      </select>
+      <div style="font-size:11px;color:var(--text4);margin-top:6px;font-style:italic;">You can type your prompts in any language — the AI will always respond in the writing language set above.</div>
+    </div>
+    <div class="modal-row"><button class="modal-cancel" onclick="closeModal()">Close</button></div>`;
+  openModal();
+}
+
+function switchWritingLang(lang){
+  S.writingLang=lang; save();
+  // Update topbar
+  const lc=LANG_CONFIG[lang];
+  document.getElementById('lang-flag').textContent=lc.flag;
+  document.getElementById('lang-label-tb').textContent=lc.label;
+  // Update quick prompts
+  renderQuickPrompts();
+  // Update project's lang if one is open
+  const proj=activeProj();
+  if(proj){ proj.lang=lang; proj.updatedAt=Date.now(); save(); }
+  closeModal();
+  toast(`Writing language → ${lc.name} ✓`);
+}
+
+function setInputLang(lang){
+  S.inputLang=lang; save();
+  const sel=document.getElementById('input-lang-select');
+  if(sel) sel.value=lang;
+  toast(`Input language → ${lang==='auto'?'Auto-detect':LANG_CONFIG[lang]?.name||lang} ✓`);
+}
+
+function renderQuickPrompts(){
+  const lang=S.writingLang||'en';
+  const prompts=QUICK_PROMPTS[lang]||QUICK_PROMPTS.en;
+  const el=document.getElementById('quick-btns');
+  if(el) el.innerHTML=prompts.map(q=>`<button class="qb" onclick="qp('${q.replace(/'/g,"\\'")}')"> ${q}</button>`).join('');
+}
+
+// ═══════════════════════════════════════════
+// MODEL SWITCHER API
+// ═══════════════════════════════════════════
+function populateModelSelect(){
+  const sel = document.getElementById('model-select');
+  if(!sel) return;
+  const provider = S.activeProvider;
+  const models = MODEL_CACHE[provider];
+  const status = MODEL_FETCH_STATUS[provider];
+  sel.innerHTML = '';
+  if(status === 'loading'){
+    const opt = document.createElement('option');
+    opt.textContent = 'Fetching models from API…';
+    opt.disabled = true;
+    sel.appendChild(opt);
+    return;
+  }
+  if(!models || !models.length){
+    const opt = document.createElement('option');
+    opt.value = S.activeModel || '';
+    opt.textContent = S.activeModel ? prettifyModelId(S.activeModel, provider) : 'Default (add key to load models)';
+    sel.appendChild(opt);
+    if(S.keys[provider]) fetchModels(provider);
+    return;
+  }
+  models.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m.id;
+    opt.textContent = m.name;
+    if(m.id === S.activeModel) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  if(!models.find(m => m.id === S.activeModel)){
+    const best = pickBestModel(provider);
+    if(best){ S.activeModel = best; save(); }
+  }
+  updateModelBadge();
+}
+
+function setModel(modelId){
+  S.activeModel = modelId; save();
+  updateModelBadge();
+  const info = getModelInfo(modelId, S.activeProvider);
+  toast(`Model → ${info.name} ✓`);
+}
+
+function updateModelBadge(){
+  const pv = PROVIDERS[S.activeProvider];
+  const info = getModelInfo(S.activeModel, S.activeProvider);
+  const dot = document.getElementById('model-dot');
+  const lbl = document.getElementById('model-label-tb');
+  if(dot && pv) dot.style.background = pv.color;
+  if(lbl) lbl.textContent = info?.name || S.activeModel || 'Select model';
+}
+
+function openModelSwitcher(){
+  const provider = S.activeProvider;
+  const models = MODEL_CACHE[provider] || [];
+  const status = MODEL_FETCH_STATUS[provider];
+  const otherProviders = Object.keys(PROVIDERS).filter(p => p !== provider);
+
+  const modelCards = status === 'loading'
+    ? `<div style="color:var(--text4);font-family:'JetBrains Mono',monospace;font-size:12px;padding:20px 0;text-align:center;">Fetching your available models from ${PROVIDERS[provider].name}…</div>`
+    : !models.length
+      ? `<div style="color:var(--text4);font-size:13px;padding:12px 0;">Could not load model list. <button onclick="fetchModels('${provider}').then(openModelSwitcher)" style="background:none;border:1px solid var(--border);color:var(--gold);padding:3px 9px;border-radius:4px;cursor:pointer;font-size:12px;font-family:'JetBrains Mono',monospace;">Retry</button></div>`
+      : `<div class="model-grid" style="grid-template-columns:1fr 1fr;">${
+          models.map(m => `
+            <div class="model-card ${S.activeModel===m.id?'selected':''}" onclick="selectModelFromModal('${m.id}')">
+              <div class="mc-name">${m.name}</div>
+              <div class="mc-desc" style="font-size:11px;color:var(--text4);margin-top:2px;font-family:'JetBrains Mono',monospace;">${m.id}</div>
+            </div>`).join('')
+        }</div>`;
+
+  document.getElementById('modal-content').innerHTML=`
+    <h2>Select Model — ${PROVIDERS[provider].logo} ${PROVIDERS[provider].name}</h2>
+    <p style="font-size:13px;color:var(--text3);margin-bottom:12px;font-style:italic;">
+      These are the models your API key actually has access to — fetched live from ${PROVIDERS[provider].name}.
+    </p>
+    ${modelCards}
+    <div style="margin-top:14px;padding:10px 12px;background:var(--bg3);border-radius:var(--radius);font-size:11px;color:var(--text4);font-family:'JetBrains Mono',monospace;line-height:1.7;">
+      Other providers:
+      ${otherProviders.map(p=>`${PROVIDERS[p].logo} ${PROVIDERS[p].name} ${S.keys[p]
+        ? `<span style="color:var(--green)">✓</span> <span style="cursor:pointer;color:var(--gold);text-decoration:underline;" onclick="switchProviderFromModal('${p}')">switch</span>`
+        : `<span style="cursor:pointer;color:var(--text4);text-decoration:underline;" onclick="closeModal();openSettings()">add key</span>`
+      }`).join(' &nbsp;·&nbsp; ')}
+    </div>
+    <div class="modal-row"><button class="modal-cancel" onclick="closeModal()">Close</button></div>`;
+  openModal();
+}
+
+function switchProviderFromModal(pid){
+  S.activeProvider = pid;
+  S.activeModel = pickBestModel(pid) || '';
+  save(); updateModelBadge(); populateModelSelect();
+  if(S.keys[pid] && MODEL_FETCH_STATUS[pid] !== 'done') fetchModels(pid);
+  closeModal();
+  toast(`Switched to ${PROVIDERS[pid].name} ✓`);
+  renderApp();
+}
+
+function selectModelFromModal(modelId){
+  S.activeModel=modelId; save();
+  updateModelBadge();
+  populateModelSelect();
+  closeModal();
+  const m=MODELS[modelId];
+  toast(`Model → ${m?.name||modelId} ✓`);
+}
+
+// Token estimate (rough)
+function updateTokenEstimate(){
+  const text=document.getElementById('user-input')?.value||'';
+  const proj=activeProj();
+  const codexLen=proj?Object.values(proj.codex||{}).join(' ').length:0;
+  const approxTokens=Math.round((text.length+codexLen)/4);
+  const el=document.getElementById('token-estimate');
+  if(el) el.textContent=approxTokens>0?`~${approxTokens} tokens`:'';
+}
+
+// ═══════════════════════════════════════════
+// RENDER APP
+// ═══════════════════════════════════════════
+function renderApp(){
+  const proj=activeProj(), pv=PROVIDERS[S.activeProvider]||PROVIDERS.anthropic, hasKey=!!S.keys[S.activeProvider];
+  const lc=LANG_CONFIG[S.writingLang]||LANG_CONFIG.en;
+  document.getElementById('project-name-display').textContent=proj?proj.title:'';
+  document.getElementById('export-btn').style.display=(proj&&activeChap())?'inline-block':'none';
+  // topbar
+  document.getElementById('lang-flag').textContent=lc.flag;
+  document.getElementById('lang-label-tb').textContent=lc.label;
+  updateModelBadge();
+  // sidebar
+  document.getElementById('sb-ai-dot').style.background=hasKey?pv.color:'#8a3a3a';
+  document.getElementById('sb-ai-text').textContent=`${pv.name} · ${getModelInfo(S.activeModel,S.activeProvider)?.name||S.activeModel} · ${hasKey?'key ✓':'no key'}`;
+  // device warning check
+  const weekAgo=new Date(Date.now()-7*24*60*60*1000).toISOString();
+  const recentDevices=(S.devices||[]).filter(d=>d.lastSeen>weekAgo);
+  if(S.plan==='pro'&&recentDevices.length>3){
+    const el=document.getElementById('sb-device-label');
+    if(el){el.textContent='⚠ Multiple devices';el.style.color='var(--red)';}
+  }
+  // input lang select
+  const ils=document.getElementById('input-lang-select');
+  if(ils) ils.value=S.inputLang||'en';
+  // quick prompts
+  renderQuickPrompts();
+  if(!proj){
+    document.getElementById('no-project-screen').style.display='flex';
+    document.getElementById('chat-area').style.display='none';
+    renderChapters([]); return;
+  }
+  document.getElementById('no-project-screen').style.display='none';
+  document.getElementById('chat-area').style.display='flex';
+  renderChapters(proj.chapters||[]);
+  const chap=activeChap();
+  if(chap){ document.getElementById('chapter-title-input').value=chap.title; document.getElementById('ch-meta').textContent=(chap.messages||[]).filter(m=>m.role==='assistant').length+' drafts · '+getModelInfo(S.activeModel,S.activeProvider)?.name; renderMsgs(chap.messages||[]);}
+  else{ renderMsgs([]); }
+  document.getElementById('send-btn').disabled=!chap||!Object.values(S.keys).some(k=>k&&k.trim());
+  renderCodex();
+}
+
+function renderChapters(chs){
+  const el=document.getElementById('chapters-list');
+  if(!chs.length){el.innerHTML='<div style="padding:12px;font-size:11px;color:var(--text4);font-style:italic;font-family:\'Cormorant Garamond\',serif;">No chapters yet.</div>';return;}
+  el.innerHTML=chs.map((c,i)=>`<div class="sb-item ${c.id===S.activeChapterId?'active':''}" onclick="selChap('${c.id}')"><span class="sb-num">${String(i+1).padStart(2,'0')}</span><span class="sb-label">${esc(c.title)}</span><span class="sb-count">${(c.messages||[]).filter(m=>m.role==='assistant').length}</span><button class="sb-del" onclick="event.stopPropagation();delChap('${c.id}')" title="Delete">✕</button></div>`).join('');
+}
+
+function renderMsgs(messages){
+  const el=document.getElementById('messages');
+  if(!messages.length){el.innerHTML='<div class="empty-chat"><div class="empty-ornament">✦</div><div>Select a chapter and begin.</div></div>';return;}
+  el.innerHTML=messages.map((m,i)=>{const long=m.role==='assistant'&&m.content.length>500;return`<div class="msg-wrap ${m.role}"><div class="msg-sender">${m.role==='user'?'You':getModelInfo(S.activeModel,S.activeProvider)?.name||'AI'}</div><div class="msg-bubble ${m.role}${long?' long':''}">${esc(m.content)}</div>${m.role==='assistant'?`<div class="msg-actions"><button class="msg-act" onclick="copyMsg(${i})">copy</button><button class="msg-act" onclick="regenMsg(${i})">regen</button></div>`:''}</div>`;}).join('');
+  setTimeout(()=>{el.scrollTop=el.scrollHeight;},40);
+}
+
+function renderCodex(){
+  const proj=activeProj(); if(!proj)return;
+  const cx=proj.codex||{};
+  const labels={characters:'Characters',plot:'Plot Outline',timeline:'Timeline',world:'World & Setting'};
+  const phs={characters:'Name: Arjun\nRole: Protagonist\nTraits: Brilliant, reckless\n...',plot:'Act 1: ...\nAct 2: ...',timeline:'Day 1: ...\nDay 3: ...',world:'Setting: ...\nRules: ...'};
+  const ta=document.getElementById('cx-ta'); if(ta){ta.value=cx[cxTab]||'';ta.placeholder=phs[cxTab];}
+  const lbl=document.getElementById('cx-label'); if(lbl)lbl.textContent=labels[cxTab];
+  cxDirty=false;
+}
+
+// ═══════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════
+function activeProj(){return S.activeProjectId?S.projects[S.activeProjectId]:null;}
+function activeChap(){const p=activeProj();if(!p||!S.activeChapterId)return null;return(p.chapters||[]).find(c=>c.id===S.activeChapterId)||null;}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function toast(msg,type,dur=2500){const t=document.getElementById('toast');t.textContent=msg;t.className=type==='error'?'error show':'show';setTimeout(()=>t.className='',dur);}
+function toggleVis(id,btn){const el=document.getElementById(id);if(el.type==='password'){el.type='text';btn.textContent='hide';}else{el.type='password';btn.textContent='show';}}
+
+// ═══════════════════════════════════════════
+// PROJECTS
+// ═══════════════════════════════════════════
+function createProject(){
+  const title=document.getElementById('np-title').value.trim(); if(!title){alert('Please enter a title.');return;}
+  const lang=document.getElementById('np-lang').value||'en';
+  const id=uid(), lc=LANG_CONFIG[lang]||LANG_CONFIG.en;
+  const welcomeMsg={ en:`Welcome to "${title}". Your Story Codex is ready.\n\nTell me how Chapter 1 opens, or say "draft it" and I'll start from your premise.`, hi:`"${title}" में आपका स्वागत है। आपका स्टोरी कोडेक्स तैयार है।\n\nबताइए पहला अध्याय कैसे शुरू होता है।`, ta:`"${title}"-க்கு வரவேற்கிறோம்.\n\nமுதல் அத்தியாயம் எவ்வாறு தொடங்குகிறது என்று சொல்லுங்கள்.` };
+  const firstChap={id:uid(),title:'Chapter 1',messages:[{role:'assistant',content:welcomeMsg[lang]||welcomeMsg.en}]};
+  S.projects[id]={id,title,genre:document.getElementById('np-genre').value.trim(),premise:document.getElementById('np-premise').value.trim(),lang,codex:{characters:'',plot:'',timeline:'',world:''},chapters:[firstChap],createdAt:Date.now(),updatedAt:Date.now()};
+  S.activeProjectId=id; S.activeChapterId=firstChap.id; S.writingLang=lang;
+  save(); renderApp();
+}
+function newProject(){if(!canAddProject()){showProjectLimitPrompt();return;}['np-title','np-genre','np-premise'].forEach(id=>{document.getElementById(id).value='';});S.activeProjectId=null;S.activeChapterId=null;renderApp();}
+function openProjects(){
+  const projs=Object.values(S.projects).sort((a,b)=>b.updatedAt-a.updatedAt);
+  document.getElementById('modal-content').innerHTML=`<h2>Your Books</h2><div>${!projs.length?'<div style="color:var(--text4);font-style:italic;font-size:14px;padding:8px 0;">No projects yet.</div>':projs.map(p=>`<div class="proj-row"><div class="proj-info"><div class="proj-name-m">${esc(p.title)}</div><div class="proj-date-m">${(p.chapters||[]).length} ch · ${p.lang||'en'} · ${new Date(p.updatedAt).toLocaleDateString('en-IN')}</div></div><button class="proj-open-btn" onclick="openProj('${p.id}')">Open</button><button class="proj-del-btn" onclick="delProj('${p.id}')">✕</button></div>`).join('')}</div><div class="modal-row"><button class="modal-cancel" onclick="closeModal()">Close</button></div>`;
+  openModal();
+}
+function openProj(id){S.activeProjectId=id;const p=S.projects[id];S.activeChapterId=(p.chapters&&p.chapters.length)?p.chapters[0].id:null;if(p.lang)S.writingLang=p.lang;closeModal();renderApp();}
+function delProj(id){if(!confirm('Delete this book?'))return;delete S.projects[id];if(S.activeProjectId===id){S.activeProjectId=null;S.activeChapterId=null;}save();openProjects();renderApp();}
+
+// ═══════════════════════════════════════════
+// CHAPTERS + CODEX
+// ═══════════════════════════════════════════
+function addChapter(){const _proj=activeProj();if(_proj&&!canAddChapter(_proj)){showChapterLimitPrompt();return;}const proj=activeProj();if(!proj)return;const num=(proj.chapters||[]).length+1;const chap={id:uid(),title:`Chapter ${num}`,messages:[{role:'assistant',content:`Chapter ${num}. What happens here? Say "draft it" and I'll continue.`}]};proj.chapters.push(chap);S.activeChapterId=chap.id;proj.updatedAt=Date.now();save();renderApp();}
+function selChap(id){S.activeChapterId=id;renderApp();}
+function delChap(id){const proj=activeProj();if(!proj)return;if(!confirm('Delete?'))return;proj.chapters=proj.chapters.filter(c=>c.id!==id);if(S.activeChapterId===id)S.activeChapterId=proj.chapters.length?proj.chapters[0].id:null;proj.updatedAt=Date.now();save();renderApp();}
+function saveChapterTitle(val){const chap=activeChap();if(!chap||!val.trim())return;chap.title=val.trim();activeProj().updatedAt=Date.now();save();renderChapters(activeProj().chapters||[]);}
+function switchCx(tab,btn){if(cxDirty)saveCodex();cxTab=tab;document.querySelectorAll('.cx-tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');renderCodex();}
+function saveCodex(){const proj=activeProj();if(!proj)return;if(!proj.codex)proj.codex={};proj.codex[cxTab]=document.getElementById('cx-ta').value;proj.updatedAt=Date.now();save();cxDirty=false;const el=document.getElementById('cx-saved');el.textContent='✓ saved';setTimeout(()=>{el.textContent='';},2000);}
+function toggleCodex(){document.getElementById('codex-panel').classList.toggle('collapsed');}
+
+// ═══════════════════════════════════════════
+// SYSTEM PROMPT (respects writing language + model)
+// ═══════════════════════════════════════════
+function buildSystem(){
+  const proj=activeProj(), chap=activeChap(); if(!proj)return'';
+  const cx=proj.codex||{}, lang=proj.lang||S.writingLang||'en', lc=LANG_CONFIG[lang]||LANG_CONFIG.en;
+  const inputLang=S.inputLang||'en';
+  const parts=[
+    `You are a creative writing collaborator helping write the novel "${proj.title}".`,
+    lc.sys,
+  ];
+  if(inputLang!=='en'&&inputLang!==lang){
+    parts.push(`The user may write their prompts in ${LANG_CONFIG[inputLang]?.name||inputLang}. Always respond with prose in ${lc.name}.`);
+  }
+  if(proj.genre) parts.push(`Genre/Style: ${proj.genre}`);
+  if(proj.premise) parts.push(`Premise: ${proj.premise}`);
+  if(cx.characters&&cx.characters.trim()) parts.push(`\n## CHARACTERS\n${cx.characters.trim()}`);
+  if(cx.plot&&cx.plot.trim()) parts.push(`\n## PLOT OUTLINE\n${cx.plot.trim()}`);
+  if(cx.timeline&&cx.timeline.trim()) parts.push(`\n## TIMELINE\n${cx.timeline.trim()}`);
+  if(cx.world&&cx.world.trim()) parts.push(`\n## WORLD & SETTING\n${cx.world.trim()}`);
+  if(chap) parts.push(`\nCurrent chapter: ${chap.title}`);
+  parts.push(`\nGUIDELINES:\n- Stay consistent with all characters, world rules, and timeline.\n- Write immersive literary prose.\n- Write the full scene when drafting.\n- Never contradict the codex.`);
+  return parts.join('\n');
+}
+
+// ═══════════════════════════════════════════
+// API CALLS (model-aware)
+// ═══════════════════════════════════════════
+async function callAnthropic(msgs,sys,key,model){
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model,max_tokens:1500,system:sys,messages:msgs})});
+  const d=await r.json();if(d.error)throw new Error(d.error.message);return(d.content||[]).map(b=>b.text||'').join('\n');
+}
+async function callOpenAI(msgs,sys,key,model){
+  const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model,max_tokens:1500,messages:[{role:'system',content:sys},...msgs]})});
+  const d=await r.json();if(d.error)throw new Error(d.error.message);return d.choices?.[0]?.message?.content||'';
+}
+async function callGemini(msgs,sys,key,model){
+  const contents=msgs.map(m=>({role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]}));
+  const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system_instruction:{parts:[{text:sys}]},contents,generationConfig:{maxOutputTokens:1500}})});
+  const d=await r.json();if(d.error)throw new Error(d.error.message);return d.candidates?.[0]?.content?.parts?.[0]?.text||'';
+}
+// ─────────────────────────────────────────
+// AUTO-SELECT: pick best available provider+model automatically
+// Priority: anthropic → openai → gemini (change order to preference)
+// ─────────────────────────────────────────
+function autoSelectProvider(){
+  const priority=['anthropic','openai','gemini'];
+  for(const pid of priority){
+    if(S.keys[pid] && S.keys[pid].trim()){
+      return pid;
+    }
+  }
+  return null;
+}
+
+function autoSelectModel(provider){
+  const best = pickBestModel(provider);
+  if(best) return best;
+  if(S.keys[provider]) fetchModels(provider);
+  return null;
+}
+
+// Classify API errors so we show the right message
+function classifyError(err, provider){
+  const msg = (err.message||'').toLowerCase();
+  if(msg.includes('quota') || msg.includes('billing') || msg.includes('insufficient_quota') || msg.includes('exceeded your current quota')){
+    return {
+      type:'quota',
+      userMessage:`⚠️ Your ${PROVIDERS[provider].name} account has run out of credits.\n\nFix: Go to ${provider==='openai'?'platform.openai.com/billing':'console.anthropic.com/billing'} and add credits.\n\nOr switch to Gemini (free tier) in Settings.`,
+      action:'billing'
+    };
+  }
+  if(msg.includes('invalid_api_key') || msg.includes('incorrect api key') || msg.includes('api key not valid')){
+    return {
+      type:'invalid_key',
+      userMessage:`⚠️ Your ${PROVIDERS[provider].name} API key is invalid.\n\nFix: Go to Settings and re-enter your API key. Make sure you copied it completely.`,
+      action:'settings'
+    };
+  }
+  if(msg.includes('rate limit') || msg.includes('too many requests')){
+    return {
+      type:'rate_limit',
+      userMessage:`⚠️ ${PROVIDERS[provider].name} is receiving too many requests right now.\n\nFix: Wait 30 seconds and try again, or switch to a different model in the Model selector above.`,
+      action:'wait'
+    };
+  }
+  if(msg.includes('model') && msg.includes('not found')){
+    return {
+      type:'model_error',
+      userMessage:`⚠️ The model "${S.activeModel}" is not available on your ${PROVIDERS[provider].name} plan.\n\nFix: Switch to a different model using the MODEL selector above the input box.`,
+      action:'model'
+    };
+  }
+  return {
+    type:'unknown',
+    userMessage:`⚠️ ${PROVIDERS[provider].name} error: ${err.message}\n\nCheck your API key and account status in Settings.`,
+    action:'settings'
+  };
+}
+
+async function callAI(msgs, sys){
+  // Step 1: Determine provider — use active if it has a key, else auto-select
+  let provider = S.activeProvider;
+  let key = S.keys[provider];
+
+  if(!key || !key.trim()){
+    // Auto-select first available provider
+    const auto = autoSelectProvider();
+    if(!auto){
+      throw new Error('NO_KEYS');
+    }
+    provider = auto;
+    key = S.keys[provider];
+    // Update state so UI reflects the switch
+    S.activeProvider = provider;
+    S.activeModel = autoSelectModel(provider);
+    save();
+    updateModelBadge();
+    populateModelSelect();
+    toast(`Auto-selected ${PROVIDERS[provider].name} ✓`);
+  }
+
+  // Step 2: Ensure model matches provider
+  const model = S.activeModel;
+  const modelInfo = getModelInfo(model, provider);
+  let actualModel = model;
+  if(!modelInfo || modelInfo.provider !== provider){
+    // Model doesn't match provider — auto-fix
+    actualModel = autoSelectModel(provider);
+    S.activeModel = actualModel;
+    save();
+    updateModelBadge();
+    populateModelSelect();
+  }
+
+  // Step 3: Make the call
+  try {
+    if(provider==='anthropic') return await callAnthropic(msgs, sys, key, actualModel);
+    if(provider==='openai')    return await callOpenAI(msgs, sys, key, actualModel);
+    if(provider==='gemini')    return await callGemini(msgs, sys, key, actualModel);
+  } catch(e) {
+    // Step 4: On quota/billing error, try next provider automatically
+    const classified = classifyError(e, provider);
+    if(classified.type === 'quota' || classified.type === 'rate_limit'){
+      const fallback = tryFallbackProvider(provider);
+      if(fallback){
+        toast(`${PROVIDERS[provider].name} quota exceeded — switching to ${PROVIDERS[fallback].name} automatically`, 'error', 4000);
+        S.activeProvider = fallback;
+        S.activeModel = autoSelectModel(fallback);
+        save(); updateModelBadge(); populateModelSelect();
+        const fallbackKey = S.keys[fallback];
+        const fallbackModel = S.activeModel;
+        if(fallback==='anthropic') return await callAnthropic(msgs, sys, fallbackKey, fallbackModel);
+        if(fallback==='openai')    return await callOpenAI(msgs, sys, fallbackKey, fallbackModel);
+        if(fallback==='gemini')    return await callGemini(msgs, sys, fallbackKey, fallbackModel);
+      }
+    }
+    // Rethrow with classified error for better display
+    const betterError = new Error(classified.userMessage);
+    betterError.classified = classified;
+    throw betterError;
+  }
+}
+
+// Find next available provider for fallback
+function tryFallbackProvider(failedProvider){
+  const priority=['anthropic','openai','gemini'];
+  for(const pid of priority){
+    if(pid !== failedProvider && S.keys[pid] && S.keys[pid].trim()){
+      return pid;
+    }
+  }
+  return null;
+}
+
+
+function qp(text){document.getElementById('user-input').value=text;sendMessage();}
+async function regenMsg(idx){const chap=activeChap();if(!chap||isLoading)return;chap.messages=chap.messages.slice(0,idx);save();renderMsgs(chap.messages);const lu=[...chap.messages].reverse().find(m=>m.role==='user');if(!lu)return;document.getElementById('user-input').value=lu.content;chap.messages=chap.messages.slice(0,chap.messages.lastIndexOf(lu));await sendMessage();}
+function copyMsg(idx){const chap=activeChap();if(!chap)return;const m=chap.messages[idx];if(!m)return;navigator.clipboard.writeText(m.content).then(()=>toast('Copied ✓'));}
+function exportChapter(){const chap=activeChap(),proj=activeProj();if(!chap||!proj)return;const texts=chap.messages.filter(m=>m.role==='assistant').map(m=>m.content);const blob=new Blob([`# ${proj.title}\n## ${chap.title}\n\n${texts.join('\n\n---\n\n')}`],{type:'text/plain'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`${proj.title.replace(/\s+/g,'_')}_${chap.title.replace(/\s+/g,'_')}.txt`;a.click();toast('Exported ✓');}
+
+// ═══════════════════════════════════════════
+// ENCRYPTED EXPORT / IMPORT
+// ═══════════════════════════════════════════
+async function deriveKey(password,salt){const enc=new TextEncoder();const km=await crypto.subtle.importKey('raw',enc.encode(password),{name:'PBKDF2'},false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:100000,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);}
+async function encryptData(data,password){const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12)),key=await deriveKey(password,salt),enc=new TextEncoder();const encrypted=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,enc.encode(JSON.stringify(data)));const combined=new Uint8Array(salt.length+iv.length+encrypted.byteLength);combined.set(salt,0);combined.set(iv,16);combined.set(new Uint8Array(encrypted),28);return btoa(String.fromCharCode(...combined));}
+async function decryptData(b64,password){const combined=Uint8Array.from(atob(b64),c=>c.charCodeAt(0)),salt=combined.slice(0,16),iv=combined.slice(16,28),data=combined.slice(28),key=await deriveKey(password,salt),dec=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,data);return JSON.parse(new TextDecoder().decode(dec));}
+
+function openExportImport(){
+  const pro = isPro();
+  document.getElementById('modal-content').innerHTML = `
+    <h2>💾 Backup & Restore</h2>
+
+    <!-- TXT Export — FREE for everyone -->
+    <div style="background:var(--bg2);border:1px solid var(--border);
+                border-radius:var(--radius);padding:14px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <h3 style="margin:0;font-size:14px;">Export as Plain Text</h3>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;
+                     color:var(--green);background:var(--bg3);
+                     padding:2px 8px;border-radius:4px;">FREE</span>
+      </div>
+      <p style="font-size:12px;color:var(--text3);margin:0 0 10px;line-height:1.6;">
+        Downloads all your books as a readable .txt file — includes your Story Codex,
+        characters, timeline, acts, and every chapter. Works for both English and Hindi writing.
+        Open in any text editor on any device. Free forever.
+      </p>
+      <button class="ei-btn primary" onclick="doExportTxt()">
+        ⬇ Download as .txt
+      </button>
+    </div>
+
+    <!-- Encrypted backup — PRO -->
+    <div style="background:var(--bg2);border:1px solid ${pro?'var(--gold-dim)':'var(--border)'};
+                border-radius:var(--radius);padding:14px;margin-bottom:14px;
+                opacity:${pro?'1':'0.6'};">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <h3 style="margin:0;font-size:14px;">Encrypted Backup</h3>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;
+                     color:var(--gold2);background:var(--bg3);
+                     padding:2px 8px;border-radius:4px;">${pro?'PRO':'PRO ↑'}</span>
+      </div>
+      <p style="font-size:12px;color:var(--text3);margin:0 0 10px;line-height:1.6;">
+        AES-256 encrypted .ailekhani file — can be restored back into the app exactly.
+        Use this to move your writing between browsers or devices.
+      </p>
+      ${pro ? `
+      <div class="key-wrap" style="margin-bottom:8px;">
+        <input type="password" id="export-pwd" placeholder="Choose a strong password…"/>
+        <button class="key-toggle" onclick="toggleVis('export-pwd',this)">show</button>
+      </div>
+      <button class="ei-btn primary" onclick="doExportEncrypted()">⬇ Download .ailekhani backup</button>
+      ` : `
+      <button class="ei-btn" onclick="closeModal();openUpgrade();"
+        style="background:var(--gold-dim);border-color:var(--gold-dim);color:var(--gold3);">
+        Join Pro Waitlist to unlock →
+      </button>`}
+    </div>
+
+    <!-- Import / Restore — FREE for txt, PRO for .ailekhani -->
+    <div style="background:var(--bg2);border:1px solid var(--border);
+                border-radius:var(--radius);padding:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <h3 style="margin:0;font-size:14px;">Restore from Backup</h3>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;
+                     color:var(--gold2);background:var(--bg3);
+                     padding:2px 8px;border-radius:4px;">${pro?'PRO':'FREE (1/12hr)'}</span>
+      </div>
+      <p style="font-size:12px;color:var(--text3);margin:0 0 10px;line-height:1.6;">
+        Restore an encrypted .ailekhani backup file. Free users can restore <strong>once every 12 hours</strong> (server-enforced — clearing cache does not reset this). Pro users get unlimited restores.
+        The plain text export cannot be reimported — it is a human-readable archive only.
+      </p>
+      <div class="key-wrap" style="margin-bottom:8px;">
+        <input type="password" id="import-pwd" placeholder="Password used when exporting…"/>
+        <button class="key-toggle" onclick="toggleVis('import-pwd',this)">show</button>
+      </div>
+      <label class="ei-btn" style="cursor:pointer;">
+        ↑ Choose .ailekhani file
+        <input type="file" accept=".ailekhani" style="display:none;"
+               onchange="doImport(this)"/>
+      </label>
+    </div>
+
+    <div class="modal-row" style="margin-top:14px;">
+      <button class="modal-cancel" onclick="closeModal()">Close</button>
+    </div>`;
+  openModal();
+}
+
+// ── PLAIN TEXT EXPORT — FREE ──────────────────────────────────────────────
+function doExportTxt() {
+  if (!S.projects || Object.keys(S.projects).length === 0) {
+    alert('No books to export yet. Write something first!');
+    return;
+  }
+
+  const lines = [];
+  const SEP  = '═'.repeat(70);
+  const DIV  = '─'.repeat(50);
+  const date = new Date().toLocaleDateString('en-IN', {
+    day: 'numeric', month: 'long', year: 'numeric'
+  });
+
+  lines.push('AI LEKHANI — COMPLETE EXPORT');
+  lines.push(`Exported on: ${date}`);
+  lines.push(`Total books: ${Object.keys(S.projects).length}`);
+  lines.push('');
+  lines.push(SEP);
+  lines.push('');
+
+  Object.values(S.projects).forEach((proj, pi) => {
+    // ── Book header ──
+    const langNames = { en: 'English', hi: 'Hindi', ta: 'Tamil' };
+    const manuscript = typeof proj.lang === 'object'
+      ? proj.lang.manuscript : (proj.lang || 'en');
+    const styleName  = typeof proj.lang === 'object' ? proj.lang.style : 'literary';
+
+    lines.push(`BOOK ${pi + 1}: ${proj.title.toUpperCase()}`);
+    lines.push(SEP);
+    lines.push('');
+
+    if (proj.genre)   lines.push(`Genre:    ${proj.genre}`);
+    if (proj.premise) lines.push(`Premise:  ${proj.premise}`);
+    lines.push(`Language: ${langNames[manuscript] || manuscript}`);
+    lines.push(`Style:    ${styleName}`);
+    lines.push('');
+
+    // ── Story Codex / Memory ──
+    const memory = proj.memory || {};
+    const hasMemory = ['canon','arc','working','reference'].some(
+      k => (memory[k] || []).length > 0
+    );
+
+    if (hasMemory) {
+      lines.push(DIV);
+      lines.push('STORY CODEX');
+      lines.push(DIV);
+      lines.push('');
+
+      const sections = [
+        { key: 'canon',     label: 'Canon Facts'      },
+        { key: 'arc',       label: 'Story Arcs'       },
+        { key: 'working',   label: 'Working Notes'    },
+        { key: 'reference', label: 'Reference Notes'  },
+      ];
+
+      sections.forEach(({ key, label }) => {
+        const items = memory[key] || [];
+        if (items.length === 0) return;
+        lines.push(`[ ${label} ]`);
+        items.forEach(item => {
+          lines.push(`  • ${item.title || 'Untitled'}`);
+          if (item.content && item.content.trim()) {
+            item.content.trim().split('
+').forEach(l =>
+              lines.push(`    ${l}`)
+            );
+          }
+          lines.push('');
+        });
+      });
+    }
+
+    // ── Characters ──
+    const chars = proj.entities?.characters || {};
+    if (Object.keys(chars).length > 0) {
+      lines.push(DIV);
+      lines.push('CHARACTERS');
+      lines.push(DIV);
+      lines.push('');
+
+      Object.values(chars).forEach(ch => {
+        lines.push(`${ch.name || 'Unnamed'}`);
+        if (ch.role)        lines.push(`  Role:        ${ch.role}`);
+        if (ch.age)         lines.push(`  Age:         ${ch.age}`);
+        if (ch.description) lines.push(`  Description: ${ch.description}`);
+        if (ch.motivation)  lines.push(`  Motivation:  ${ch.motivation}`);
+        if (ch.arc)         lines.push(`  Arc:         ${ch.arc}`);
+        if (ch.notes)       lines.push(`  Notes:       ${ch.notes}`);
+        lines.push('');
+      });
+    }
+
+    // ── Locations ──
+    const locs = proj.entities?.locations || {};
+    if (Object.keys(locs).length > 0) {
+      lines.push(DIV);
+      lines.push('LOCATIONS');
+      lines.push(DIV);
+      lines.push('');
+
+      Object.values(locs).forEach(loc => {
+        lines.push(`${loc.name || 'Unnamed'}`);
+        if (loc.description) lines.push(`  ${loc.description}`);
+        lines.push('');
+      });
+    }
+
+    // ── Timeline ──
+    const timeline = proj.timeline || [];
+    if (timeline.length > 0) {
+      lines.push(DIV);
+      lines.push('TIMELINE');
+      lines.push(DIV);
+      lines.push('');
+
+      timeline.forEach(event => {
+        const when = event.date || event.time || '';
+        lines.push(`  ${when ? when + ' — ' : ''}${event.title || event.event || ''}`);
+        if (event.description) lines.push(`    ${event.description}`);
+      });
+      lines.push('');
+    }
+
+    // ── Acts / Arc structure ──
+    const arcs = proj.arc?.arcs || [];
+    if (arcs.length > 0) {
+      lines.push(DIV);
+      lines.push('STORY STRUCTURE');
+      lines.push(DIV);
+      lines.push('');
+
+      arcs.forEach((arc, ai) => {
+        lines.push(`Act ${ai + 1}: ${arc.title || 'Untitled'}`);
+        if (arc.summary) lines.push(`  ${arc.summary}`);
+        // List chapters in this act
+        const actChaps = (proj.chapters || []).filter(ch => ch.arcId === arc.id);
+        if (actChaps.length > 0) {
+          lines.push(`  Chapters: ${actChaps.map(ch => ch.title).join(', ')}`);
+        }
+        lines.push('');
+      });
+    }
+
+    // ── Chapters — the actual writing ──
+    const chapters = proj.chapters || [];
+    if (chapters.length > 0) {
+      lines.push(DIV);
+      lines.push('CHAPTERS');
+      lines.push(DIV);
+      lines.push('');
+
+      chapters.forEach((ch, ci) => {
+        // Find which act this chapter belongs to
+        const parentArc = arcs.find(a => a.id === ch.arcId);
+        const actLabel  = parentArc ? ` [${parentArc.title}]` : '';
+
+        lines.push(`Chapter ${ci + 1}: ${ch.title}${actLabel}`);
+        if (ch.wordCount) lines.push(`Words: ~${ch.wordCount}`);
+        lines.push('');
+
+        // Chapter instructions / user prompts (the writer's intent)
+        const instructions = (ch.messages || []).filter(m => m.role === 'user');
+        if (instructions.length > 0) {
+          lines.push('  [ Writing Instructions ]');
+          instructions.forEach(m => {
+            const text = (m.content || '').trim();
+            if (text && text.length < 300) { // only short prompts, skip long ones
+              lines.push(`  > ${text.replace(/
+/g, ' ')}`);
+            }
+          });
+          lines.push('');
+        }
+
+        // The actual AI-written prose — all assistant responses
+        const prose = (ch.messages || [])
+          .filter(m => m.role === 'assistant')
+          .map(m => (m.content || '').trim())
+          .filter(t => t.length > 50) // skip tiny system messages
+          .join('
+
+');
+
+        if (prose) {
+          lines.push('  [ Prose ]');
+          lines.push('');
+          // Indent prose by 2 spaces for readability
+          prose.split('
+').forEach(l => lines.push(`  ${l}`));
+          lines.push('');
+        } else {
+          lines.push('  [ No prose written yet ]');
+          lines.push('');
+        }
+
+        // Extracted facts for this chapter
+        const facts = ch.extractedFacts || [];
+        if (facts.length > 0) {
+          lines.push('  [ Extracted Facts ]');
+          facts.forEach(f => lines.push(`  • ${f.content || f}`));
+          lines.push('');
+        }
+
+        lines.push(DIV);
+        lines.push('');
+      });
+    }
+
+    // Space between books
+    lines.push('');
+    lines.push(SEP);
+    lines.push('');
+  });
+
+  // Footer
+  lines.push('End of export — AI Lekhani (ailekhani.com)');
+  lines.push(`Generated: ${new Date().toISOString()}`);
+
+  // Build and download
+  const text = lines.join('
+');
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = `ailekhani-${new Date().toISOString().slice(0,10)}.txt`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+  toast('Exported as plain text ✓');
+}
+
+async function doExportEncrypted(){
+  if(!canUse('exportBackup')){showUpgradePrompt('exportBackup');return;}const pwd=document.getElementById('export-pwd').value;if(!pwd||pwd.length<4){alert('Password must be at least 4 characters.');return;}try{const payload={version:1,exportedAt:Date.now(),projects:S.projects};const encrypted=await encryptData(payload,pwd);const blob=new Blob([encrypted],{type:'text/plain'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`ailekhani-backup-${new Date().toISOString().slice(0,10)}.ailekhani`;a.click();toast('Backup downloaded ✓ Keep it safe!');}catch(e){alert('Export failed: '+e.message);}}
+async function doImport(input){
+  // Server-side rate limit check (cache-proof — stored in Supabase)
+  // Falls back to localStorage check if server unavailable
+  if (!isPro()) {
+    const user = typeof getUser === 'function' ? getUser() : null;
+    if (!user || !user.email) {
+      toast('Please sign in with Google before importing a backup.', 'error', 4000);
+      return;
+    }
+    try {
+      const checkRes = await fetch('/.netlify/functions/auth/check-import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user.email })
+      });
+      const checkData = await checkRes.json();
+      if (!checkData.allowed) {
+        showUpgradePrompt(null, checkData.message);
+        return;
+      }
+    } catch (serverErr) {
+      // Server unavailable — fall back to localStorage check
+      const localCheck = typeof canImportFree === 'function' ? canImportFree() : { allowed: true };
+      if (!localCheck.allowed) {
+        showUpgradePrompt(null, localCheck.message);
+        return;
+      }
+    }
+  }const file=input.files[0];if(!file)return;const pwd=document.getElementById('import-pwd').value;if(!pwd){alert('Enter the export password.');return;}try{const text=await file.text();const payload=await decryptData(text,pwd);if(!payload.projects)throw new Error('Invalid file');let count=0;Object.values(payload.projects).forEach(p=>{if(!S.projects[p.id]){S.projects[p.id]=p;count++;}});save();closeModal();renderApp();if(typeof recordImport==='function') recordImport();
+    toast(`Restored ${count} project(s) ✓`);}catch(e){alert('Could not restore: wrong password or corrupted file.\n'+e.message);}}
+
+// ═══════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════
+function openSettings(){
+  document.getElementById('modal-content').innerHTML=`
+    <h2>Settings</h2>
+    <div class="settings-section">
+      <h3>AI Providers & Models</h3>
+      ${Object.entries(PROVIDERS).map(([pid,pv])=>`
+        <div class="provider-setting ${S.activeProvider===pid?'active-provider':''}">
+          <div class="ps-header"><span class="ps-logo">${pv.logo}</span><span class="ps-name">${pv.name}</span>
+          ${S.activeProvider===pid?`<span class="ps-active-badge">ACTIVE · ${getModelInfo(S.activeModel,S.activeProvider)?.name||S.activeModel}</span>`:`<button class="ps-use-btn" onclick="switchProvider('${pid}')">Use this</button>`}</div>
+          <div class="ps-field"><input type="password" id="key-${pid}" value="${S.keys[pid]||''}" placeholder="${pv.placeholder}" oninput="psKeyInput('${pid}',this.value)"/><button class="ps-toggle" onclick="toggleVis('key-${pid}',this)">show</button></div>
+          <div class="ps-status" id="pss-${pid}">${S.keys[pid]?'<span style=\'color:var(--green)\'>✓ Key saved</span>':''}</div>
+          <div style="font-size:11px;color:var(--text4);margin-top:3px;font-style:italic;">${pv.hint}</div>
+          ${S.activeProvider===pid?`<div style="margin-top:8px;"><div class="model-grid" style="grid-template-columns:1fr 1fr;">${MODEL_PRIORITY.filter(id=>MODELS[id]?.provider===pid).map(id=>{const m=MODELS[id];return`<div class="model-card ${S.activeModel===id?'selected':''}" onclick="selectModelFromSettings('${id}')" style="cursor:pointer;"><div style="display:flex;justify-content:space-between;margin-bottom:3px;"><div class="mc-name">${m.name}</div>${m.badge?`<span style="font-size:9px;color:var(--gold);font-family:'JetBrains Mono',monospace;white-space:nowrap;">${m.badge}</span>`:''}</div><div class="mc-desc">${m.quality}</div><div class="mc-cost">${m.cost}</div></div>`;}).join('')}</div></div>`:''}
+        </div>`).join('')}
+    </div>
+    <div class="settings-section">
+      <h3>Languages</h3>
+      <div class="settings-row">
+        <div class="sl"><strong>Writing language</strong><span>Language AI writes prose in</span></div>
+        <select class="ic-select" onchange="switchWritingLangFromSettings(this.value)" style="flex-shrink:0;">
+          <option value="en" ${S.writingLang==='en'?'selected':''}>English</option>
+          <option value="hi" ${S.writingLang==='hi'?'selected':''}>हिंदी</option>
+          <option value="ta" ${S.writingLang==='ta'?'selected':''}>தமிழ்</option>
+        </select>
+      </div>
+      <div class="settings-row">
+        <div class="sl"><strong>Input language</strong><span>Language of your prompts</span></div>
+        <select class="ic-select" onchange="setInputLang(this.value)" style="flex-shrink:0;">
+          <option value="en" ${S.inputLang==='en'?'selected':''}>English</option>
+          <option value="hi" ${S.inputLang==='hi'?'selected':''}>हिंदी</option>
+          <option value="ta" ${S.inputLang==='ta'?'selected':''}>தமிழ்</option>
+          <option value="auto" ${S.inputLang==='auto'?'selected':''}>Auto-detect</option>
+        </select>
+      </div>
+    </div>
+    <div class="settings-section">
+      <h3>Security & Data</h3>
+      <div class="settings-row">
+        <div class="sl"><strong>Device security</strong><span>${(S.devices||[]).length} device(s) registered</span></div>
+        <button onclick="closeModal();openDeviceSecurity();" style="background:none;border:1px solid var(--border);color:var(--text2);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-family:'JetBrains Mono',monospace;flex-shrink:0;">View</button>
+      </div>
+      <div class="settings-row">
+        <div class="sl"><strong>Backup & Restore</strong><span>Export as .txt or encrypted backup</span></div>
+        <button onclick="closeModal();openExportImport();" style="background:none;border:1px solid var(--border);color:var(--text2);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-family:'JetBrains Mono',monospace;flex-shrink:0;">Open</button>
+      </div>
+      <div class="settings-row">
+        <div class="sl"><strong>Clear all data</strong><span>Delete everything from this browser</span></div>
+        <button onclick="clearAll()" style="background:none;border:1px solid var(--red);color:var(--red);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-family:'JetBrains Mono',monospace;flex-shrink:0;">Clear all</button>
+      </div>
+    </div>
+    <div class="modal-row"><button class="modal-cancel" onclick="closeModal()">Cancel</button><button class="modal-ok" onclick="saveSettings()">Save Keys</button></div>`;
+  openModal();
+}
+function selectModelFromSettings(modelId){S.activeModel=modelId;save();updateModelBadge();populateModelSelect();toast(`Model → ${getModelInfo(modelId,S.activeProvider)?.name} ✓`);}
+function switchWritingLangFromSettings(lang){S.writingLang=lang;save();const lc=LANG_CONFIG[lang];document.getElementById('lang-flag').textContent=lc.flag;document.getElementById('lang-label-tb').textContent=lc.label;renderQuickPrompts();const proj=activeProj();if(proj){proj.lang=lang;proj.updatedAt=Date.now();save();}toast(`Writing language → ${lc.name} ✓`);}
+function psKeyInput(pid,val){const pv=PROVIDERS[pid],st=document.getElementById('pss-'+pid);if(!val){st.innerHTML='';return;}if(val.startsWith(pv.prefix)&&val.length>16){st.innerHTML='<span style="color:var(--green)">✓ correct</span>';}else if(val.length>8){st.innerHTML='<span style="color:var(--red)">✗ check format</span>';}}
+function switchProvider(pid){S.activeProvider=pid;S.activeModel=PROVIDERS[pid].defaultModel;save();populateModelSelect();openSettings();toast(`Switched to ${PROVIDERS[pid].name} ✓`);}
+function saveSettings(){
+  Object.keys(PROVIDERS).forEach(pid=>{
+    const el=document.getElementById('key-'+pid);
+    if(el&&el.value.trim()){
+      const isNew = S.keys[pid] !== el.value.trim();
+      S.keys[pid]=el.value.trim();
+      // Fetch models for newly added keys
+      if(isNew) fetchModels(pid);
+    }
+  });
+  save();closeModal();renderApp();toast('Saved ✓ — fetching available models…');
+}
+function clearAll(){if(!confirm('Delete ALL data?'))return;localStorage.removeItem(SK);location.reload();}
+
+// ═══════════════════════════════════════════
+// UPGRADE
+// ═══════════════════════════════════════════
+function openUpgrade(){
+  const authUser = typeof getUser === 'function' ? getUser() : null;
+  document.getElementById('modal-content').innerHTML=`
+    <h2>⭐ AI Lekhani Pro — Coming Soon</h2>
+
+    <div style="background:var(--gold-pale);border:1px solid var(--gold-dim);
+                border-radius:var(--radius-lg);padding:18px;margin-bottom:16px;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;
+                  color:var(--gold);letter-spacing:0.12em;margin-bottom:10px;">
+        WHAT'S COMING IN PRO
+      </div>
+      ${[
+        'Unlimited books and chapters',
+        'Write in Hindi and Tamil',
+        'Claude and ChatGPT support',
+        'All 6 writing style modes',
+        'Continuity engine and fact extraction',
+        'Voice input and read aloud',
+        'Encrypted backup and restore',
+      ].map(f => `<div style="display:flex;gap:8px;font-size:13px;color:var(--text2);
+                              margin-bottom:6px;align-items:flex-start;">
+                    <span style="color:var(--green);flex-shrink:0;">✓</span>
+                    <span>${f}</span>
+                  </div>`).join('')}
+      <div style="margin-top:12px;text-align:center;">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:28px;
+                    font-style:italic;color:var(--gold2);">
+          ₹399<span style="font-size:16px;color:var(--text3);">/month</span>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;
+                    color:var(--text4);margin-top:2px;">
+          or ₹3,499/year · launching soon
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <div style="font-size:13px;color:var(--text3);margin-bottom:10px;line-height:1.6;">
+        Join the waitlist — we'll email you the moment Pro launches.
+        Early waitlist members get <strong style="color:var(--gold2);">first month free</strong>.
+      </div>
+      <input type="email" id="waitlist-email"
+        placeholder="${authUser?.email || 'your@gmail.com'}"
+        value="${authUser?.email || ''}"
+        style="width:100%;background:var(--bg3);border:1px solid var(--border);
+               border-radius:var(--radius);padding:10px 13px;
+               font-family:'JetBrains Mono',monospace;font-size:13px;
+               color:var(--text1);margin-bottom:8px;"/>
+      <button onclick="joinWaitlist()"
+        style="width:100%;background:var(--gold-dim);border:1px solid var(--gold-dim);
+               color:var(--gold3);padding:13px;border-radius:var(--radius);
+               cursor:pointer;font-family:'Cormorant Garamond',serif;
+               font-size:17px;font-style:italic;">
+        Join the waitlist →
+      </button>
+    </div>
+
+    <div class="modal-row">
+      <button class="modal-cancel" onclick="closeModal()">Maybe later</button>
+    </div>`;
+  openModal();
+}
+
+async function joinWaitlist(){
+  const emailEl = document.getElementById('waitlist-email');
+  const email   = emailEl?.value?.trim();
+  if(!email || !email.includes('@')){
+    toast('Please enter a valid email address', 'error');
+    return;
+  }
+
+  // Save waitlist signup to Supabase via auth function
+  try {
+    await fetch('/.netlify/functions/auth/waitlist', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email })
+    });
+  } catch(e) {} // silent — don't block the UX
+
+  closeModal();
+  toast('You're on the list! We'll email you when Pro launches. 🎉');
+
+  // Track the intent in funnel
+  if(typeof trackFunnelEvent === 'function') trackFunnelEvent('waitlist_joined');
+}
+async function initiatePayment(plan){
+  // Must be logged in to pay
+  const authUser = typeof getUser === 'function' ? getUser() : null;
+  if(!authUser?.email){
+    closeModal();
+    toast('Please sign in with Google first, then upgrade.', 'error', 4000);
+    if(typeof loginWithGoogle === 'function') setTimeout(loginWithGoogle, 1500);
+    return;
+  }
+
+  const btn = document.querySelector('.upgrade-btn');
+  if(btn){ btn.textContent = 'Creating order…'; btn.disabled = true; }
+
+  try{
+    // STEP 1: Create order on server first
+    // This is crucial — without a server-created order, payment cannot be verified
+    const orderRes = await fetch('/.netlify/functions/create-order', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ plan, email: authUser.email })
+    });
+
+    if(!orderRes.ok) throw new Error('Could not create order');
+    const { orderId, amount, currency } = await orderRes.json();
+
+    // STEP 2: Open Razorpay checkout with the server-created order
+    const RAZORPAY_KEY = 'rzp_live_YOUR_KEY_HERE';
+    const options = {
+      key:         RAZORPAY_KEY,
+      order_id:    orderId,       // server-created order — enables signature verification
+      amount:      amount,
+      currency:    currency || 'INR',
+      name:        'AI Lekhani',
+      description: plan === 'monthly' ? 'Pro Monthly ₹399' : 'Pro Annual ₹3,499',
+      prefill: {
+        email: authUser.email   // pre-fills the email in Razorpay form
+      },
+      theme: { color: '#c8922a' },
+      modal: {
+        ondismiss: function(){
+          toast('Payment cancelled. Your card was not charged.');
+        }
+      },
+      handler: function(response){
+        // STEP 3: Verify payment on server after Razorpay confirms
+        verifyPayment(response, plan, authUser.email);
+      }
+    };
+
+    const rzp = new Razorpay(options);
+
+    rzp.on('payment.failed', function(response){
+      toast('Payment failed: ' + (response.error?.description || 'Unknown error'), 'error', 5000);
+      console.error('Payment failed:', response.error);
+    });
+
+    rzp.open();
+
+  } catch(e){
+    toast('Could not start payment. Please try again or email support@ailekhani.com', 'error', 5000);
+    console.error('initiatePayment error:', e);
+    if(btn){ btn.textContent = 'Pay →'; btn.disabled = false; }
+  }
+}
+async function verifyPayment(response, plan, email){
+  // Show verification loading state
+  toast('Verifying payment…');
+
+  try{
+    const res = await fetch('/.netlify/functions/verify-payment', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        razorpay_order_id:   response.razorpay_order_id,
+        razorpay_payment_id: response.razorpay_payment_id,
+        razorpay_signature:  response.razorpay_signature,
+        plan,
+        email
+      })
+    });
+
+    const data = await res.json();
+
+    if(res.ok && data.success){
+      // Update local state immediately
+      S.licenceKey = data.licenceKey;
+      S.plan       = 'pro';
+      save();
+
+      // Update auth user so isPro() works instantly
+      const authUser = typeof getUser === 'function' ? getUser() : null;
+      if(authUser && typeof saveUser === 'function'){
+        authUser.plan = 'pro';
+        saveUser(authUser);
+      }
+
+      closeModal();
+      toast('Welcome to Pro! ⭐ All features are now unlocked.');
+
+      // Refresh UI
+      if(typeof renderApp    === 'function') renderApp();
+      if(typeof updateAuthUI === 'function') updateAuthUI();
+
+      // Update FREE pill → PRO
+      const pill = document.getElementById('free-pill');
+      if(pill){ pill.textContent='PRO'; pill.style.color='var(--gold2)'; }
+
+    } else {
+      // Payment went through but verification failed
+      // This should not happen if keys are correct
+      toast(
+        'Payment received but activation failed. Email support@ailekhani.com with your payment ID: ' +
+        response.razorpay_payment_id,
+        'error', 10000
+      );
+      console.error('Verify failed:', data);
+    }
+
+  } catch(e){
+    toast(
+      'Could not verify. Your payment is safe — email support@ailekhani.com with payment ID: ' +
+      response.razorpay_payment_id,
+      'error', 10000
+    );
+    console.error('verifyPayment error:', e);
+  }
+},body:JSON.stringify({...response,plan,deviceId:S.deviceId})});
+    if(res.ok){const data=await res.json();S.licenceKey=data.licenceKey;S.plan='pro';save();closeModal();toast('Welcome to Pro! ⭐');renderApp();}
+
+
+// ═══════════════════════════════════════════
+// MODAL + UI
+// ═══════════════════════════════════════════
+function openModal(){document.getElementById('modal-overlay').classList.add('open');}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');}
+document.getElementById('modal-overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}}
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';}
+document.getElementById('user-input').addEventListener('input',function(){
+  const hasAnyKey=Object.values(S.keys).some(k=>k&&k.trim());
+  document.getElementById('send-btn').disabled=!this.value.trim()||isLoading||!activeChap()||!hasAnyKey;
+});
+</script>
+<!-- Razorpay script — uncomment when ready to take payments
+<script src="https://checkout.razorpay.com/v1/checkout.js">
+
+// ════════════════════════════════════════════════════════
+// AI LEKHANI v5 — MODULE INIT
+// Wires schema, multilingual, context, extractor,
+// continuity, voice, and ui modules together.
+// ════════════════════════════════════════════════════════
+
+function initAI LekhaniV5() {
+  setTimeout(() => {
+    initUI();
+    initVoice();
+    console.log('[AI Lekhani] v5 ready ✓');
+    console.log('[AI Lekhani] Modules: schema · multilingual · context · extractor · continuity · voice · ui');
+  }, 600);
+}
+
+document.addEventListener('DOMContentLoaded', initAI LekhaniV5);
+if (document.readyState !== 'loading') initAI LekhaniV5();
+
+// ═══════════════════════════════════════════
+// MOBILE — sidebar drawer, codex bottom sheet
+// ═══════════════════════════════════════════
+
+function isMobile() { return window.innerWidth <= 768; }
+
+function toggleSidebar() {
+  const sidebar  = document.getElementById('sidebar');
+  const overlay  = document.getElementById('sidebar-overlay');
+  const isOpen   = sidebar.classList.contains('open');
+  if (isOpen) { closeSidebar(); }
+  else {
+    sidebar.classList.add('open');
+    overlay.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+function toggleCodexMobile() {
+  if (!isMobile()) { toggleCodex(); return; }
+  const panel = document.getElementById('codex-panel');
+  const isOpen = panel.classList.contains('open');
+  if (isOpen) { closeCodex(); }
+  else {
+    panel.classList.remove('collapsed');
+    panel.classList.add('open');
+    // Add close gesture — tap outside
+    setTimeout(() => {
+      document.addEventListener('click', closeCodexOutside, { once: true });
+    }, 100);
+  }
+}
+
+function closeCodex() {
+  const panel = document.getElementById('codex-panel');
+  panel.classList.remove('open');
+  if (!isMobile()) panel.classList.add('collapsed');
+}
+
+function closeCodexOutside(e) {
+  const panel = document.getElementById('codex-panel');
+  if (!panel.contains(e.target)) closeCodex();
+}
+
+// On mobile, close sidebar after selecting a chapter
+const _origSelChap = typeof selChap !== 'undefined' ? selChap : null;
+if (typeof selChap !== 'undefined') {
+  const _mobileSelChap = function(id) {
+    selChap(id);
+    if (isMobile()) closeSidebar();
+  };
+  // Override via timeout to ensure selChap is defined
+  setTimeout(() => { window.selChap = _mobileSelChap; }, 100);
+}
+
+// Adjust for virtual keyboard on mobile
+// When input is focused, scroll messages to bottom
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('user-input');
+  if (input) {
+    input.addEventListener('focus', () => {
+      if (isMobile()) {
+        setTimeout(() => {
+          const msgs = document.getElementById('messages');
+          if (msgs) msgs.scrollTop = msgs.scrollHeight;
+        }, 400); // wait for keyboard animation
+      }
+    });
+  }
+
+  // Swipe-to-close sidebar
+  let touchStartX = 0;
+  document.addEventListener('touchstart', e => {
+    touchStartX = e.touches[0].clientX;
+  }, { passive: true });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const sidebar = document.getElementById('sidebar');
+    // Swipe left more than 80px while sidebar is open = close it
+    if (dx < -80 && sidebar.classList.contains('open')) closeSidebar();
+    // Swipe right from left edge = open sidebar
+    if (dx > 80 && touchStartX < 30 && !sidebar.classList.contains('open')) toggleSidebar();
+  }, { passive: true });
+
+  // Swipe down to close codex bottom sheet
+  let cxTouchStart = 0;
+  const codexPanel = document.getElementById('codex-panel');
+  if (codexPanel) {
+    codexPanel.addEventListener('touchstart', e => {
+      cxTouchStart = e.touches[0].clientY;
+    }, { passive: true });
+    codexPanel.addEventListener('touchend', e => {
+      const dy = e.changedTouches[0].clientY - cxTouchStart;
+      if (dy > 80) closeCodex(); // swipe down 80px = close
+    }, { passive: true });
+  }
+});
+
+// Override toggleCodex for mobile
+const _origToggleCodex = window.toggleCodex;
+window.toggleCodex = function() {
+  if (isMobile()) { toggleCodexMobile(); }
+  else if (_origToggleCodex) { _origToggleCodex(); }
+};
+
+</script>
+</body>
+</html>
