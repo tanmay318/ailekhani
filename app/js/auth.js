@@ -80,9 +80,9 @@ function toast(message, type = 'info') {
 
 // ✅ ADD HERE
 function onGeminiKeyInput(e) {
-  const value = e.target.value;
+  const value = e?.target?.value || '';
   localStorage.setItem('gemini_api_key', value);
-  console.log("Gemini key saved");
+  console.log("Gemini key:", value);
 }
 
 
