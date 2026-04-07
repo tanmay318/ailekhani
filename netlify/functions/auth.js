@@ -17,8 +17,22 @@ async function fetchJSON(url, options = {}) {
   const { default: fetch } = await import('node-fetch').catch(() => ({
     default: (u, o) => globalThis.fetch(u, o)
   }));
+
   const res = await fetch(url, options);
-  return res.json();
+
+  const text = await res.text(); // ✅ read raw response first
+
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    console.error("Invalid JSON from:", url);
+    console.error("Response:", text);
+
+    return {
+      error: "Invalid JSON response",
+      raw: text
+    };
+  }
 }
 
 // ── Supabase REST helper ──────────────────────────────────────
@@ -128,16 +142,24 @@ exports.handler = async (event) => {
     try {
       // Exchange code for Google token
       const tokenRes = await fetchJSON('https://oauth2.googleapis.com/token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          code,
-          client_id:     process.env.GOOGLE_CLIENT_ID,
-          client_secret: process.env.GOOGLE_CLIENT_SECRET,
-          redirect_uri:  redirect_uri || `${process.env.SITE_URL}/app/`,
-          grant_type:    'authorization_code'
-        }).toString()
-      });
+  method: 'POST',
+  headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+  body: new URLSearchParams({
+    code,
+    client_id:     process.env.GOOGLE_CLIENT_ID,
+    client_secret: process.env.GOOGLE_CLIENT_SECRET,
+    redirect_uri:  redirect_uri || `${process.env.SITE_URL}/app/`,
+    grant_type:    'authorization_code'
+  }).toString()
+});
+
+if (!tokenRes || tokenRes.error || !tokenRes.access_token) {
+  throw new Error(
+    tokenRes?.error_description ||
+    tokenRes?.error ||
+    "Google token exchange failed"
+  );
+}
 
       if (tokenRes.error) throw new Error(tokenRes.error_description || tokenRes.error);
 
@@ -154,7 +176,7 @@ exports.handler = async (event) => {
 
       // ── Look up existing auth_provider row ──────────────
       const existingAuth = await fetchJSON(
-        `${process.env.SUPABASE_URL}/rest/v1/auth_providers?provider=eq.google&provider_email=eq.${encodeURIComponent(googleUser.email)}&select=user_id,id`,
+        `${process.env.SUPABASE_URL}/rest/v1/auth_providers?provider=eq.google&provider_email=eq.${googleUser.email}&select=user_id,id`,
         { headers: { 'apikey': process.env.SUPABASE_SERVICE_KEY,
                      'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_KEY}` } }
       );
