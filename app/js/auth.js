@@ -159,21 +159,18 @@ setTimeout(() => {
   }
 }, 300);
     
- // ✅ Safe toast usage
-    if (data.isNew) {
-      toast(`Welcome to AI Lekhani! Your account is ready.`);
-    } else {
-      const name = data.email ? data.email.split('@')[0] : 'User';
-      toast(`Welcome back! Signed in as ${name}`);
-    }
-
+   // ✅ Safe toast usage
+if (data.isNew) {
+  toast("Welcome to AI Lekhani! Your account is ready.");
+} else {
+  const name = data.email ? data.email.split('@')[0] : 'User';
+  toast("Welcome back! Signed in as " + name);
+}
     return user;
-
   } catch (e) {
     showAuthLoading(false);
     console.error('Auth callback error:', e);
-
-    toast(e.message || 'Sign-in failed. Please try again.', 'error');
+  toast(e.message ? e.message : "Sign-in failed. Please try again.", "error");
     return null;
   }
 }
