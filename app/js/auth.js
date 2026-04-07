@@ -68,7 +68,15 @@ function loginWithGoogle() {
 
   window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
 }
+// ✅ Safe toast fallback (prevents crash)
+function toast(message, type = 'info') {
+  console.log(`[${type.toUpperCase()}]`, message);
 
+  // Optional UI fallback
+  if (typeof document !== "undefined") {
+    alert(message);
+  }
+}
 // ── Handle OAuth callback (called on page load) ───────
 async function handleOAuthCallback() {
   const params = new URLSearchParams(window.location.search);
@@ -78,26 +86,25 @@ async function handleOAuthCallback() {
 
   if (error) {
     console.warn('OAuth error:', error);
-    // Clean URL
     window.history.replaceState({}, '', window.location.pathname);
     return null;
   }
 
   if (!code) return null;
 
-  // Verify state to prevent CSRF
+  // ✅ Validate state (CSRF protection)
   const savedState = localStorage.getItem('al_oauth_state');
-  if (state !== savedState) {
-    console.error('OAuth state mismatch');
+
+  if (!state || state !== savedState) {
+    console.error('OAuth state mismatch', { state, savedState });
     window.history.replaceState({}, '', window.location.pathname);
     return null;
   }
 
-  // Clean URL immediately so refresh doesn't re-trigger
+  // Clean URL
   window.history.replaceState({}, '', window.location.pathname);
   localStorage.removeItem('al_oauth_state');
 
-  // Show loading state
   showAuthLoading(true);
 
   try {
@@ -107,8 +114,20 @@ async function handleOAuthCallback() {
       body: JSON.stringify({ code, redirect_uri: REDIRECT_URI })
     });
 
-    const data = await res.json();
-    if (!res.ok || data.error) throw new Error(data.error || 'Auth failed');
+    // ✅ Read raw response first (prevents SyntaxError crash)
+    const text = await res.text();
+    console.log("RAW RESPONSE:", text);
+
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (err) {
+      throw new Error("Invalid JSON response from server");
+    }
+
+    if (!res.ok || data.error) {
+      throw new Error(data.error || 'Auth failed');
+    }
 
     const user = {
       email:      data.email,
@@ -118,10 +137,6 @@ async function handleOAuthCallback() {
       isNew:      data.isNew,
       loggedInAt: new Date().toISOString()
     };
-
-    saveUser(user);
-    showAuthLoading(false);
-    updateAuthUI();
 
    saveUser(user);
 showAuthLoading(false);
@@ -144,18 +159,42 @@ setTimeout(() => {
   }
 }, 300);
 
+   saveUser(user);
+showAuthLoading(false);
+updateAuthUI();
+
+// 🚀 Decide where to go
+setTimeout(() => {
+  if (data.isNew) {
+    // 👉 Show onboarding
+    document.getElementById('signin-screen').style.display = 'none';
+    document.getElementById('onboarding-screen').classList.remove('hidden');
+    document.getElementById('topbar').style.display = 'none';
+    document.getElementById('app').style.display = 'none';
+  } else {
+    // 👉 Go to main app
+    document.getElementById('signin-screen').style.display = 'none';
+    document.getElementById('onboarding-screen').classList.add('hidden');
+    document.getElementById('topbar').style.display = 'flex';
+    document.getElementById('app').style.display = 'flex';
+  }
+}, 300);
+
+ // ✅ Safe toast usage
     if (data.isNew) {
-      toast(`Welcome to AI Lekhani! 🎉 Your account is ready.`);
+      toast(`Welcome to AI Lekhani! Your account is ready.`);
     } else {
-      toast(`Welcome back! Signed in as ${data.email.split('@')[0]} ✓`);
+      const name = data.email ? data.email.split('@')[0] : 'User';
+      toast(`Welcome back! Signed in as ${name}`);
     }
 
     return user;
 
-  } catch(e) {
+  } catch (e) {
     showAuthLoading(false);
     console.error('Auth callback error:', e);
-    toast('Sign-in failed. Please try again.', 'error');
+
+    toast(e.message || 'Sign-in failed. Please try again.', 'error');
     return null;
   }
 }
@@ -316,6 +355,36 @@ function openUserPanel() {
 // ── Init on page load ─────────────────────────────────
 async function initAuth() {
   loadUserFromStorage();
+
+  const params = new URLSearchParams(window.location.search);
+
+  if (params.get('code')) {
+    await handleOAuthCallback();
+    return;
+  }
+
+  const user = getUser();
+
+  if (!user) {
+    // 👉 Show sign-in screen
+    document.getElementById('signin-screen').style.display = 'flex';
+    document.getElementById('onboarding-screen').classList.add('hidden');
+    document.getElementById('topbar').style.display = 'none';
+    document.getElementById('app').style.display = 'none';
+  } else {
+    // 👉 Existing user → skip onboarding
+    document.getElementById('signin-screen').style.display = 'none';
+    document.getElementById('onboarding-screen').classList.add('hidden');
+    document.getElementById('topbar').style.display = 'flex';
+    document.getElementById('app').style.display = 'flex';
+  }
+
+  trackVisit();
+  updateAuthUI();
+  updateStatsDisplay();
+}
+
+  // Handle OAuth callback if returning from Google
   const params = new URLSearchParams(window.location.search);
   if (params.get('code')) {
     await handleOAuthCallback();
