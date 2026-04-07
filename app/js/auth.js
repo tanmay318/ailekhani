@@ -123,6 +123,11 @@ async function handleOAuthCallback() {
     showAuthLoading(false);
     updateAuthUI();
 
+    // After sign in — go to onboarding or app
+    if (typeof bootApp === 'function') {
+      setTimeout(bootApp, 300);
+    }
+
     if (data.isNew) {
       toast(`Welcome to AI Lekhani! 🎉 Your account is ready.`);
     } else {
@@ -309,6 +314,12 @@ async function initAuth() {
   // Update UI
   updateAuthUI();
   updateStatsDisplay();
+
+  // Signal to app/index.html that auth is ready
+  // This triggers the boot sequence which decides what screen to show
+  if (typeof window.onAuthReady === 'function') {
+    window.onAuthReady();
+  }
 }
 
 // Auto-init
