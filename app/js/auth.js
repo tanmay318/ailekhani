@@ -159,6 +159,26 @@ setTimeout(() => {
   }
 }, 300);
 
+   saveUser(user);
+showAuthLoading(false);
+updateAuthUI();
+
+// 🚀 Decide where to go
+setTimeout(() => {
+  if (data.isNew) {
+    // 👉 Show onboarding
+    document.getElementById('signin-screen').style.display = 'none';
+    document.getElementById('onboarding-screen').classList.remove('hidden');
+    document.getElementById('topbar').style.display = 'none';
+    document.getElementById('app').style.display = 'none';
+  } else {
+    // 👉 Go to main app
+    document.getElementById('signin-screen').style.display = 'none';
+    document.getElementById('onboarding-screen').classList.add('hidden');
+    document.getElementById('topbar').style.display = 'flex';
+    document.getElementById('app').style.display = 'flex';
+  }
+}, 300);
 
  // ✅ Safe toast usage
     if (data.isNew) {
@@ -368,7 +388,27 @@ async function initAuth() {
   const params = new URLSearchParams(window.location.search);
   if (params.get('code')) {
     await handleOAuthCallback();
+    return;
   }
+  const user = getUser();
+  if (!user) {
+    // 👉 Show sign-in screen
+    document.getElementById('signin-screen').style.display = 'flex';
+    document.getElementById('onboarding-screen').classList.add('hidden');
+    document.getElementById('topbar').style.display = 'none';
+    document.getElementById('app').style.display = 'none';
+  } else {
+    // 👉 Existing user → skip onboarding
+    document.getElementById('signin-screen').style.display = 'none';
+    document.getElementById('onboarding-screen').classList.add('hidden');
+    document.getElementById('topbar').style.display = 'flex';
+    document.getElementById('app').style.display = 'flex';
+  }
+
+  trackVisit();
+  updateAuthUI();
+  updateStatsDisplay();
+}
 
   // Track this visit
   trackVisit();
