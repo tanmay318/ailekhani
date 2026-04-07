@@ -142,10 +142,9 @@ async function handleOAuthCallback() {
     showAuthLoading(false);
     updateAuthUI();
 
-    // After sign in — go to onboarding or app
-        if (typeof bootApp === 'function') {
-      setTimeout(bootApp, 300);
-    }
+// 🚀 Always move forward after login
+setTimeout(() => {window.location.href = '/app/index.html'; // or your next page}, 300);
+                  
  // ✅ Safe toast usage
     if (data.isNew) {
       toast(`Welcome to AI Lekhani! Your account is ready.`);
