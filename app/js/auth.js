@@ -123,10 +123,25 @@ async function handleOAuthCallback() {
     showAuthLoading(false);
     updateAuthUI();
 
-    // After sign in — go to onboarding or app
-  // 🚀 Always move forward after login
+   saveUser(user);
+showAuthLoading(false);
+updateAuthUI();
+
+// 🚀 Decide where to go
 setTimeout(() => {
-  window.location.href = '/app/index.html'; // or your next page
+  if (data.isNew) {
+    // 👉 Show onboarding
+    document.getElementById('signin-screen').style.display = 'none';
+    document.getElementById('onboarding-screen').classList.remove('hidden');
+    document.getElementById('topbar').style.display = 'none';
+    document.getElementById('app').style.display = 'none';
+  } else {
+    // 👉 Go to main app
+    document.getElementById('signin-screen').style.display = 'none';
+    document.getElementById('onboarding-screen').classList.add('hidden');
+    document.getElementById('topbar').style.display = 'flex';
+    document.getElementById('app').style.display = 'flex';
+  }
 }, 300);
 
     if (data.isNew) {
