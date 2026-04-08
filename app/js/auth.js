@@ -78,11 +78,25 @@ function toast(message, type = 'info') {
   }
 }
 
+function initGeminiKey() {
+  const key = localStorage.getItem('gemini_api_key') || '';
+
+  const input = document.getElementById('gemini-key-input');
+  const btn = document.getElementById('start-writing-btn');
+
+  if (input) input.value = key;
+  if (btn) btn.disabled = key.length < 10;
+}
 // ✅ ADD HERE
 function onGeminiKeyInput(e) {
-  const value = e?.target?.value || '';
+  const value = e.target.value.trim();
+  // Save key
   localStorage.setItem('gemini_api_key', value);
-  console.log("Gemini key:", value);
+  // Enable button
+  const btn = document.getElementById('start-writing-btn');
+  if (btn) {
+    btn.disabled = value.length < 10;
+  }
 }
 
 
@@ -358,6 +372,7 @@ async function initAuth() {
     document.getElementById('app').style.display = 'flex';
   }
   // ✅ keep everything INSIDE function
+  initGeminiKey();
   trackVisit();
   updateAuthUI();
   updateStatsDisplay();
