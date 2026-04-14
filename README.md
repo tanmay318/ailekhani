@@ -51,10 +51,3 @@ Join the waitlist at **ailekhani.com**
 ---
 
 *© 2026 AI Lekhani. All rights reserved.*
-<<<<<<< HEAD
-=======
-=======
-# ailekhani
-AI Lekhani
->>>>>>> f481000f3c74d1ac5dda2a0b021e30b9b8a06903
->>>>>>> 2e9b1710c4d362685749979511573b6b239a8394
