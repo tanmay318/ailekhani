@@ -2314,7 +2314,7 @@ async function doImport(input){
       return;
     }
     try {
-      const checkRes = await fetch('/.netlify/functions/auth/check-import', {
+      const checkRes = await fetch('/api/auth/check-import', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: user.email })
@@ -2485,7 +2485,7 @@ async function joinWaitlist(){
 
   // Save waitlist signup to Supabase via auth function
   try {
-    await fetch('/.netlify/functions/auth/waitlist', {
+    await fetch('/api/auth/waitlist', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ email })
@@ -2514,7 +2514,7 @@ async function initiatePayment(plan){
   try{
     // STEP 1: Create order on server first
     // This is crucial — without a server-created order, payment cannot be verified
-    const orderRes = await fetch('/.netlify/functions/create-order', {
+    const orderRes = await fetch('/api/create-order', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ plan, email: authUser.email })
@@ -2567,7 +2567,7 @@ async function verifyPayment(response, plan, email){
   toast('Verifying payment…');
 
   try{
-    const res = await fetch('/.netlify/functions/verify-payment', {
+    const res = await fetch('/api/verify-payment', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({

@@ -1,0 +1,5 @@
+# www redirect
+https://www.ailekhani.com/* https://ailekhani.com/:splat 301!
+
+# .in redirect
+https://ailekhani.in/* https://ailekhani.com/:splat 301!
